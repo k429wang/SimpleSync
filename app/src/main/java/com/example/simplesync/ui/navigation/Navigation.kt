@@ -30,18 +30,18 @@ import androidx.compose.ui.Modifier
 // good code go to waste.
 
 @Composable
-fun rememberBiteWiseNavController(
+fun rememberSimpleSyncNavController(
     navController: NavHostController = rememberNavController()
-): BiteWiseNavController = remember(navController) {
-    BiteWiseNavController(navController)
+): SimpleSyncNavController = remember(navController) {
+    SimpleSyncNavController(navController)
 }
 
 // navigateUp is probably too complex for us to really need.
 
 @Composable
-fun BiteWiseAppNav(
+fun SimpleSyncAppNav(
     modifier: Modifier = Modifier,
-    navController: BiteWiseNavController,
+    navController: SimpleSyncNavController,
     // If we want to pass data between UI screens, use this.
     //viewModel: AppViewModel,
     startDestination: String = "WELCOME"
@@ -66,7 +66,7 @@ fun BiteWiseAppNav(
 }
 
 @Stable
-class BiteWiseNavController(
+class SimpleSyncNavController(
     val navController: NavHostController,
 
     ){
