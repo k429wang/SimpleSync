@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.simplesync.ui.pages.MainScreen
 import com.example.simplesync.ui.theme.SimpleSyncTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,12 +20,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SimpleSyncTheme {
+                MainScreen()
+                /*
+                I'll build a custom Scaffold wrapper, it's just good practice.
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
+                */
             }
         }
     }
