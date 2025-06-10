@@ -11,6 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.example.simplesync"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -55,6 +56,8 @@ dependencies {
     // retrofit and its dependencies
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
