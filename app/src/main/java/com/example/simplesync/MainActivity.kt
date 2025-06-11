@@ -30,16 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import io.github.jan.supabase.postgrest.from
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.simplesync.viewmodel.UserViewModel
+import androidx.compose.runtime.collectAsState
+import dagger.hilt.android.AndroidEntryPoint
 
-
-
-val supabase = createSupabaseClient(
-    supabaseUrl = "https://xugzrydvytilvvucphpg.supabase.co",
-    supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z3pyeWR2eXRpbHZ2dWNwaHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0ODk2NTIsImV4cCI6MjA2NTA2NTY1Mn0.GPO7nHT7owWW02p2wzwTRn2e9C2RzBjM75Yfd2PgaAY"
-) {
-    install(Postgrest)
-}
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,14 +65,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun UsersList() {
-    var users by remember { mutableStateOf<List<User>>(listOf()) }
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            users = supabase.from("users")
-                .select().decodeList<User>()
-        }
-    }
+fun UsersList(viewModel: UserViewModel = viewModel()) {
+    val users by viewModel.users.collectAsState()
+
     LazyColumn {
         items(
             users,
