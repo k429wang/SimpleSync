@@ -61,7 +61,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // supabase
-    implementation(libs.bom)
-    implementation(libs.postgrest.kt)
+    implementation(platform(libs.bom))
+    implementation(libs.supabase.postgrest.kt)
     implementation(libs.ktor.client.android)
 }
