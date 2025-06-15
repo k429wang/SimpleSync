@@ -60,4 +60,17 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    // Create a new user
+    fun createUser(newUser: User, onSuccess: () -> Unit = {}, onError: (Throwable) -> Unit = {}) {
+        viewModelScope.launch {
+            try {
+                supabase.from("users")
+                    .insert(newUser)
+                onSuccess()
+            } catch (e: Exception) {
+                android.util.Log.e("UserViewModel", "Failed to create user", e)
+                onError(e)
+            }
+        }
+    }
 }
