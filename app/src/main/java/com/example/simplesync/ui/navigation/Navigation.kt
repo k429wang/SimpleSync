@@ -18,6 +18,7 @@ import com.example.simplesync.ui.pages.HomePage
 import com.example.simplesync.ui.pages.NewEventPage
 import com.example.simplesync.ui.pages.SearchPage
 import com.example.simplesync.ui.pages.SettingsPage
+import com.example.simplesync.ui.pages.UserProfile
 
 /*
     The purpose of this function is to collect nav into a single, easy-to-use file,
@@ -90,6 +91,9 @@ fun SimpleSyncAppNav(
         composable(navController.SETTINGS) {
             SettingsPage(navController)
         }
+        composable(navController.USER_PROFILE) {
+            UserProfile(navController)
+        }
     }
 }
 
@@ -108,6 +112,7 @@ class SimpleSyncNavController(
     val NEW_EVENT = "NEW_EVENT"
     val SETTINGS = "SETTINGS"
     val SEARCH = "SEARCH"
+    val USER_PROFILE = "USER_PROFILE"
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
 
     // and, for convenience, we also save the current page!

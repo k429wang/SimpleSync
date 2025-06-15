@@ -17,22 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.remember
 import com.example.simplesync.ui.pages.MainScreen
 import com.example.simplesync.ui.theme.SimpleSyncTheme
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.auth.Auth
-import com.example.simplesync.model.User
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import io.github.jan.supabase.postgrest.from
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.simplesync.viewmodel.UserViewModel
-import androidx.compose.runtime.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -42,14 +26,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SimpleSyncTheme {
-//                MainScreen()
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    UsersList()
-                }
+                MainScreen()
+                // A surface container using the 'background' color from the them
                 /*
                 I'll build a custom Scaffold wrapper, it's just good practice.
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -64,22 +42,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun UsersList(viewModel: UserViewModel = viewModel()) {
-    val users by viewModel.users.collectAsState()
 
-    LazyColumn {
-        items(
-            users,
-            key = { user -> user.userName },
-        ) { user ->
-            Text(
-                text = "${user.userName} - ${user.email}: ${user.firstName} ${user.lastName}",
-                modifier = Modifier.padding(8.dp),
-            )
-        }
-    }
-}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
