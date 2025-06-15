@@ -11,10 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val supabase: SupabaseClient
 ) : ViewModel() {
+    // Single user
+    private val _currUser = MutableStateFlow<User?>(null)
+    val currUser: StateFlow<User?> = _currUser
+
+    // All users
     private val _users = MutableStateFlow<List<User>>(emptyList())
     val users: StateFlow<List<User>> = _users
 
@@ -22,6 +28,7 @@ class UserViewModel @Inject constructor(
         fetchUsers()
     }
 
+    // Fetch all users
     private fun fetchUsers(){
         viewModelScope.launch {
             try {
@@ -34,4 +41,23 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
+    // Fetch a user using their username
+    fun getUserById(id: String) {
+        viewModelScope.launch {
+            try {
+                val user = supabase.from("users").select {
+                    filter{
+                        eq("userName", id) // TODO: Change to logged in user
+                    }
+                }.decodeSingle<User>()
+
+                _currUser.value = user
+            } catch (e: Exception) {
+                android.util.Log.e("UserViewModel", "Error fetching user by ID", e)
+                _currUser.value = null
+            }
+        }
+    }
+
 }
