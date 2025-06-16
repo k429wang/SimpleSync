@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.Modifier
 import com.example.simplesync.ui.pages.CalendarPage
 import com.example.simplesync.ui.pages.EventPage
+import com.example.simplesync.ui.pages.ExternalCalendarSyncPage
 import com.example.simplesync.ui.pages.HomePage
 import com.example.simplesync.ui.pages.NewEventPage
 import com.example.simplesync.ui.pages.ProfileScreen
@@ -106,6 +107,9 @@ fun SimpleSyncAppNav(
         composable(navController.USER_PROFILE) {
             UserProfile(navController)
         }
+        composable(navController.EXTERNAL_SIGN_IN) {
+            ExternalCalendarSyncPage()
+        }
     }
 }
 
@@ -129,6 +133,7 @@ class SimpleSyncNavController(
     val PROFILE = "PROFILE"
     val USER_PROFILE = "USER_PROFILE"
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
+    val EXTERNAL_SIGN_IN = "EXTERNAL_SIGN_IN"
 
     // and, for convenience, we also save the current page!
     // This is a kotlin class instead of a composable, so no need for statefulness

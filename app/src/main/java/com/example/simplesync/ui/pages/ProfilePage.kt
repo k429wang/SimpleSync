@@ -147,12 +147,25 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
-                onClick = { /* TODO */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                modifier = Modifier.wrapContentWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Add new", color = Color.White)
+                Button(
+                    onClick = { /* TODO */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Add new", color = Color.White)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = { /* TODO: Sync external calendar */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Sync External", color = Color.White)
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -173,6 +186,11 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             HorizontalDivider()
             SettingsOption("Notification Settings")
             HorizontalDivider()
+            SettingsOption("External Calendar Sign-in") {
+                navController?.nav(navController.EXTERNAL_SIGN_IN)
+            }
+            HorizontalDivider()
+
         }
     }
 }
