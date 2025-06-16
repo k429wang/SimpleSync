@@ -164,13 +164,15 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Divider()
-            SettingsOption("My Account")
-            Divider()
+            HorizontalDivider()
+            SettingsOption("My Account") {
+                navController?.nav(navController.USER_PROFILE)
+            }
+            HorizontalDivider()
             SettingsOption("Privacy")
-            Divider()
+            HorizontalDivider()
             SettingsOption("Notification Settings")
-            Divider()
+            HorizontalDivider()
         }
     }
 }
