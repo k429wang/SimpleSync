@@ -1,5 +1,8 @@
 package com.example.simplesync.ui.pages
 
+import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.navigation.SimpleSyncNavController
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -13,8 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ExternalCalendarSyncPage() {
-    Scaffold { padding ->
+fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
+    Scaffold(
+        bottomBar = { BottomNavBar(navController) }
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,7 +62,7 @@ fun ExternalCalendarSyncPage() {
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
-                        Divider()
+                        HorizontalDivider()
                         Spacer(modifier = Modifier.height(64.dp))
 
                         Button(
@@ -72,7 +77,7 @@ fun ExternalCalendarSyncPage() {
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
-                        Divider()
+                        HorizontalDivider()
                         Spacer(modifier = Modifier.height(64.dp))
 
                         Button(
@@ -87,7 +92,7 @@ fun ExternalCalendarSyncPage() {
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
-                        Divider()
+                        HorizontalDivider()
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
@@ -99,5 +104,6 @@ fun ExternalCalendarSyncPage() {
 @Preview(showBackground = true)
 @Composable
 fun ExternalCalendarSyncPreview() {
-    ExternalCalendarSyncPage()
+    // Preview cannot provide a real navController, so pass a stub or mock if needed
+    // ExternalCalendarSyncPage(navController = ...)
 }

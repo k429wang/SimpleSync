@@ -108,7 +108,7 @@ fun SimpleSyncAppNav(
             UserProfile(navController)
         }
         composable(navController.EXTERNAL_SIGN_IN) {
-            ExternalCalendarSyncPage()
+            ExternalCalendarSyncPage(navController)
         }
     }
 }
