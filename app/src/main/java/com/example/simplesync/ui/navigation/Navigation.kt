@@ -16,6 +16,7 @@ import com.example.simplesync.ui.pages.CalendarPage
 import com.example.simplesync.ui.pages.EventPage
 import com.example.simplesync.ui.pages.HomePage
 import com.example.simplesync.ui.pages.NewEventPage
+import com.example.simplesync.ui.pages.ProfileScreen
 import com.example.simplesync.ui.pages.SearchPage
 import com.example.simplesync.ui.pages.SettingsPage
 
@@ -90,6 +91,9 @@ fun SimpleSyncAppNav(
         composable(navController.SETTINGS) {
             SettingsPage(navController)
         }
+        composable(navController.PROFILE) {
+            ProfileScreen(navController)
+        }
     }
 }
 
@@ -108,6 +112,7 @@ class SimpleSyncNavController(
     val NEW_EVENT = "NEW_EVENT"
     val SETTINGS = "SETTINGS"
     val SEARCH = "SEARCH"
+    val PROFILE = "PROFILE"
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
 
     // and, for convenience, we also save the current page!
