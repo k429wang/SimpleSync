@@ -18,6 +18,9 @@ import com.example.simplesync.ui.pages.HomePage
 import com.example.simplesync.ui.pages.NewEventPage
 import com.example.simplesync.ui.pages.SearchPage
 import com.example.simplesync.ui.pages.SettingsPage
+import com.example.simplesync.ui.pages.SignIn
+import com.example.simplesync.ui.pages.SignUp
+import com.example.simplesync.ui.pages.UserProfile
 
 /*
     The purpose of this function is to collect nav into a single, easy-to-use file,
@@ -72,6 +75,9 @@ fun SimpleSyncAppNav(
         composable(navController.PAGE_TO_GO_TO) {
             //PageFunction(navController)//,viewModel)
         }
+        composable(navController.SIGN_IN) {
+            SignIn(navController)
+        }
         composable(navController.HOME) {
             HomePage(navController)
         }
@@ -90,6 +96,12 @@ fun SimpleSyncAppNav(
         composable(navController.SETTINGS) {
             SettingsPage(navController)
         }
+        composable(navController.USER_PROFILE) {
+            UserProfile(navController)
+        }
+        composable(navController.SIGN_UP) {
+            SignUp(navController)
+        }
     }
 }
 
@@ -102,12 +114,15 @@ class SimpleSyncNavController(
     // It's honestly more convenient to have them here as constants.
     // these are the routes used in the nav function below.
     // no dedicated home?
+    val SIGN_UP = "SIGN_UP"
+    val SIGN_IN = "SIGN_IN"
     val HOME = "HOME"
     val CALENDAR = "CALENDAR"
     val EVENTS = "EVENTS"
     val NEW_EVENT = "NEW_EVENT"
     val SETTINGS = "SETTINGS"
     val SEARCH = "SEARCH"
+    val USER_PROFILE = "USER_PROFILE"
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
 
     // and, for convenience, we also save the current page!

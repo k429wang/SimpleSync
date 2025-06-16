@@ -3,11 +3,11 @@ package com.example.simplesync.ui.pages
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,34 +23,57 @@ fun HomePage(navController: SimpleSyncNavController) {
         modifier = Modifier.fillMaxSize()
     ){
         // The navbar
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+        Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(8.dp)
-        ){
-        Button(
-            onClick = {
-                navController.nav(navController.CALENDAR)
-            },
-            colors = ButtonDefaults.buttonColors(Color.Gray)
-        )
-        { Text(text = "CALENDAR", color = Color.Black)}
-        Button(
-            onClick = {
-                navController.nav(navController.EVENTS)
-            },
-            colors = ButtonDefaults.buttonColors(Color.Gray)
-        )
-        { Text(text = "EVENTS", color = Color.Black)}
-        Button(
-            onClick = {
-                navController.nav(navController.NEW_EVENT)
-            },
-            colors = ButtonDefaults.buttonColors(Color.Gray)
-        )
-        { Text(text = "NEW_EVENT", color = Color.Black)}
+                        .align(Alignment.BottomCenter)
+                        .padding(8.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        navController.nav(navController.CALENDAR)
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Gray)
+                )
+                { Text(text = "CALENDAR", color = Color.Black) }
+
+                Button(
+                    onClick = {
+                        navController.nav(navController.EVENTS)
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Gray)
+                )
+                { Text(text = "EVENTS", color = Color.Black) }
+
+                Button(
+                    onClick = {
+                        navController.nav(navController.NEW_EVENT)
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Gray)
+                )
+                { Text(text = "NEW_EVENT", color = Color.Black) }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        navController.nav(navController.USER_PROFILE)
+                    },
+                    colors = ButtonDefaults.buttonColors(Color.Gray)
+                )
+                { Text(text = "USER_PROFILE", color = Color.Black) }
+            }
         }
     }
 }
