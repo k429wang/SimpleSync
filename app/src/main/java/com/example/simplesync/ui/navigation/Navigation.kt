@@ -19,6 +19,7 @@ import com.example.simplesync.ui.pages.NewEventPage
 import com.example.simplesync.ui.pages.SearchPage
 import com.example.simplesync.ui.pages.SettingsPage
 import com.example.simplesync.ui.pages.SignIn
+import com.example.simplesync.ui.pages.SignUp
 import com.example.simplesync.ui.pages.UserProfile
 
 /*
@@ -98,6 +99,9 @@ fun SimpleSyncAppNav(
         composable(navController.USER_PROFILE) {
             UserProfile(navController)
         }
+        composable(navController.SIGN_UP) {
+            SignUp(navController)
+        }
     }
 }
 
@@ -110,6 +114,7 @@ class SimpleSyncNavController(
     // It's honestly more convenient to have them here as constants.
     // these are the routes used in the nav function below.
     // no dedicated home?
+    val SIGN_UP = "SIGN_UP"
     val SIGN_IN = "SIGN_IN"
     val HOME = "HOME"
     val CALENDAR = "CALENDAR"
