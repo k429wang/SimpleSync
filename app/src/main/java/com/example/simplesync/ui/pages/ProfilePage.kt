@@ -19,33 +19,30 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
-import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.SimpleSyncScaffold
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 
 
-
+// I don't think this is called, ever?
 class ProfilePage : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ProfileScreen()
+            //ProfileScreen()
         }
     }
 }
 
 @Composable
-fun ProfileScreen(navController: SimpleSyncNavController? = null) {
-    Scaffold(
-        bottomBar = {
-            navController?.let { BottomNavBar(it) }
-        }
-    ) { padding ->
-        Column(
+fun ProfileScreen(navController: SimpleSyncNavController) {
+    SimpleSyncScaffold(
+        navController = navController,
+        pageName = "Profile",
+        displayPage =
+    { Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -166,7 +163,7 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
 
             HorizontalDivider()
             SettingsOption("My Account") {
-                navController?.nav(navController.USER_PROFILE)
+                navController.nav(navController.USER_PROFILE)
             }
             HorizontalDivider()
             SettingsOption("Privacy")
@@ -175,6 +172,7 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             HorizontalDivider()
         }
     }
+    )
 }
 
 @Composable
@@ -191,10 +189,4 @@ fun SettingsOption(text: String, onClick: () -> Unit = {}) {
             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    ProfileScreen()
 }
