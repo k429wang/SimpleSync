@@ -56,8 +56,9 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             ) {
                 Column {
                     Text(
-                        "Profile",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                        text = "Profile",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
@@ -110,6 +111,7 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             )
 
             // PLACE HOLDER FOR CALENDAR!!!!!!
+            // TODO: update with working calendar
             Spacer(modifier = Modifier.height(8.dp))
 
             // Header Row for Days
@@ -209,10 +211,4 @@ fun SettingsOption(text: String, onClick: () -> Unit = {}) {
             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    ProfileScreen()
 }
