@@ -40,6 +40,7 @@ fun SignUp(
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -81,6 +82,13 @@ fun SignUp(
             )
 
             OutlinedTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
                 label = { Text("First Name") },
@@ -114,7 +122,7 @@ fun SignUp(
             Spacer(modifier = Modifier.height(12.dp))
 
             Button (
-                onClick = { viewModel.signUp(email, firstName, lastName, password) },
+                onClick = { viewModel.signUp(email, username, firstName, lastName, password) },
                 enabled = email.isNotBlank() && password.length >= 6
             ) {
                 Text("Create Account")
