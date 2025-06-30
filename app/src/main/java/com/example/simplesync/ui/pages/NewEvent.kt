@@ -1,8 +1,11 @@
 package com.example.simplesync.ui.pages
 
+import DropdownField
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,15 +20,23 @@ import com.example.simplesync.ui.navigation.SimpleSyncNavController
 
 @Composable
 fun NewEventPage(navController: SimpleSyncNavController) {
+    // Enums
+    val typeOptions = listOf<String>("IRL", "Virtual")
+    val recurrenceOptions = listOf<String>("Once", "Daily", "Weekly")
+    val visibilityOptions = listOf<String>("Solo", "Private", "Public")
+
     // values sent to backend
     // TODO: connect to backend
     val name = remember { mutableStateOf("") }
     val description = remember { mutableStateOf("") }
-    val time = remember { mutableStateOf("") }
-    val recurrence = remember { mutableStateOf("") }
+    val startTime = remember { mutableStateOf("") }
+    val endTime = remember { mutableStateOf("") }
     val type = remember { mutableStateOf("") }
     val location = remember { mutableStateOf("") }
+    val recurrence = remember { mutableStateOf("") }
     val visibility = remember { mutableStateOf("") }
+
+    val scrollState = rememberScrollState()
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
@@ -34,7 +45,14 @@ fun NewEventPage(navController: SimpleSyncNavController) {
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .verticalScroll(scrollState)
+                .padding(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 12.dp,
+                    // Ensures last element does not overlap with bottom nav
+                    bottom = innerPadding.calculateBottomPadding() + 12.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
@@ -86,11 +104,12 @@ fun NewEventPage(navController: SimpleSyncNavController) {
             // fields that will be synced with the backend
             CompactEventField("Name:", name)           // -> send as "name"
             CompactEventField("Description:", description) // -> send as "description"
-            CompactEventField("Time:", time)           // -> send as "time"
-            CompactEventField("Recurrence:", recurrence) // -> send as "recurrence"
-            CompactEventField("Type:", type)           // -> send as "type"
+            CompactEventField("Start Time:", startTime)
+            CompactEventField("End Time:", endTime)           // -> send as "time"
+            DropdownField("Type:", typeOptions, type)           // -> send as "type"
             CompactEventField("Location:", location)   // -> send as "location"
-            CompactEventField("Visibility:", visibility) // -> send as "visibility
+            DropdownField("Recurrence:", recurrenceOptions ,recurrence) // -> send as "recurrence"
+            DropdownField("Visibility:", visibilityOptions, visibility) // -> send as "visibility
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -141,9 +160,8 @@ fun CompactEventField(label: String, value: MutableState<String>) {
             value = value.value,
             onValueChange = { value.value = it },
             modifier = Modifier
-                .fillMaxWidth()
-                .height(36.dp),
-            textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                .fillMaxWidth(),
+            textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 16.sp),
             singleLine = true
         )
     }
