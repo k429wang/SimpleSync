@@ -35,7 +35,7 @@ fun BottomNavBar(navController: SimpleSyncNavController) {
                 )
             },
             selected = false,
-            onClick = { navController.bottomButtonNav(navController.SEARCH) }
+            onClick = { navController.bottomButtonNav(navController.FRIENDS) }
         )
 
         NavigationBarItem(

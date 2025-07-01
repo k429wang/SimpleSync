@@ -8,15 +8,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
+import com.example.simplesync.ui.components.ScreenTitle
+import com.example.simplesync.ui.components.EventField
 
 @Composable
 fun NewEventPage(navController: SimpleSyncNavController) {
@@ -55,16 +54,11 @@ fun NewEventPage(navController: SimpleSyncNavController) {
                 ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Create event",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            // Title
+            ScreenTitle("Create Event")
 
             // PLACE HOLDER FOR CALENDAR!!!!!!
             // TODO: update with working calendar
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Header Row for Days
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -102,18 +96,18 @@ fun NewEventPage(navController: SimpleSyncNavController) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // fields that will be synced with the backend
-            CompactEventField("Name:", name)           // -> send as "name"
-            CompactEventField("Description:", description) // -> send as "description"
-            CompactEventField("Start Time:", startTime)
-            CompactEventField("End Time:", endTime)           // -> send as "time"
+            EventField("Name:", name)           // -> send as "name"
+            EventField("Description:", description) // -> send as "description"
+            EventField("Start Time:", startTime)
+            EventField("End Time:", endTime)           // -> send as "time"
             DropdownField("Type:", typeOptions, type)           // -> send as "type"
-            CompactEventField("Location:", location)   // -> send as "location"
+            EventField("Location:", location)   // -> send as "location"
             DropdownField("Recurrence:", recurrenceOptions ,recurrence) // -> send as "recurrence"
             DropdownField("Visibility:", visibilityOptions, visibility) // -> send as "visibility
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Invite button, also sends you to the next screen???
+            // Invite button, also sends you to list of friends
             Button(
                 onClick = {
                     // TODO: send data to backend
@@ -141,28 +135,3 @@ fun NewEventPage(navController: SimpleSyncNavController) {
     }
 }
 
-@Composable
-fun CompactEventField(label: String, value: MutableState<String>) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
-            modifier = Modifier
-                .width(100.dp)
-                .padding(end = 4.dp)
-        )
-        OutlinedTextField(
-            value = value.value,
-            onValueChange = { value.value = it },
-            modifier = Modifier
-                .fillMaxWidth(),
-            textStyle = MaterialTheme.typography.bodySmall.copy(fontSize = 16.sp),
-            singleLine = true
-        )
-    }
-}
