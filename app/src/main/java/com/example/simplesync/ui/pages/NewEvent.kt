@@ -64,7 +64,7 @@ fun NewEventPage(
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
-                navController.nav(navController.HOME) // TODO: Update to navigate to the created event's page
+                navController.nav(navController.EVENTS) // TODO: Update to navigate to the created event's page
             }.onFailure { e ->
                 print("ERROR: ${e.message}")
                 coroutineScope.launch {
