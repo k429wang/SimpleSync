@@ -26,12 +26,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignIn(
     navController: SimpleSyncNavController,
-    viewModel: SignInViewModel = hiltViewModel()
+    viewModel: SignInViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -46,6 +48,7 @@ fun SignIn(
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Signed in successfully!")
                 }
+                userViewModel.fetchCurrentUser() // Set currUser in userViewModel
                 navController.nav(navController.HOME) // Go to home screen
             }.onFailure { e ->
                 coroutineScope.launch {
