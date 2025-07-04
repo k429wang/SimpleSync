@@ -23,7 +23,7 @@ fun BottomNavBar(navController: SimpleSyncNavController) {
                 )
             },
             selected = false,
-            onClick = { navController.bottomButtonNav(navController.CALENDAR) }
+            onClick = { navController.bottomButtonNav(navController.EVENTS) }
         )
 
         NavigationBarItem(
@@ -59,7 +59,7 @@ fun BottomNavBar(navController: SimpleSyncNavController) {
                 )
             },
             selected = false,
-            onClick = { navController.bottomButtonNav(navController.EVENTS) }
+            onClick = { navController.bottomButtonNav(navController.NOTIFICATIONS) }
         )
 
         NavigationBarItem(
