@@ -22,7 +22,7 @@ fun EventField(label: String, value: MutableState<String>) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp)
-            .height(40.dp),
+            .height(50.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
