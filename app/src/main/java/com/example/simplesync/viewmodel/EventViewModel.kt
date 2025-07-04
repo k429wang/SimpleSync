@@ -26,7 +26,7 @@ class EventViewModel @Inject constructor(
     val eventResult: StateFlow<Result<Boolean>?> = _eventResult
 
     // Retrieve the events for a specific user
-    fun fetchEventsForUser(userId: UUID) {
+    fun fetchEventsForUser(userId: String) {
         viewModelScope.launch {
             try {
                 val fetched = supabase.from(EVENTS_TABLE).select {
