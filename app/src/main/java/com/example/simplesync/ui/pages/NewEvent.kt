@@ -18,6 +18,7 @@ import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.DateTimePickerField
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.components.EventField
@@ -41,8 +42,8 @@ fun NewEventPage(
     val currUser by userViewModel.currUser.collectAsState()
     val name = remember { mutableStateOf("") }
     val description = remember { mutableStateOf("") }
-    val startTime = remember { mutableStateOf("") }
-    val endTime = remember { mutableStateOf("") }
+    val startTime = remember { mutableStateOf<Instant?>(null) }
+    val endTime = remember { mutableStateOf<Instant?>(null) }
     val type = remember { mutableStateOf("") }
     val location = remember { mutableStateOf("") }
     val recurrence = remember { mutableStateOf("") }
@@ -63,7 +64,7 @@ fun NewEventPage(
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
-                navController.nav(navController.HOME) // TODO: Update to navigate to EVENTS page
+                navController.nav(navController.HOME) // TODO: Update to navigate to the created event's page
             }.onFailure { e ->
                 print("ERROR: ${e.message}")
                 coroutineScope.launch {
@@ -130,11 +131,17 @@ fun NewEventPage(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // fields that will be synced with the backend
+            // Fields that will be synced with the backend
             EventField("Name:", name)
             EventField("Description:", description)
-            EventField("Start Time:", startTime) // TODO: Update to date picker
-            EventField("End Time:", endTime)
+
+            DateTimePickerField("Start Time", startTime.value) {
+                startTime.value = it
+            }
+            DateTimePickerField("End Time", endTime.value) {
+                endTime.value = it
+            }
+
             DropdownField("Type:", typeOptions, type)
             EventField("Location:", location)
             DropdownField("Recurrence:", recurrenceOptions, recurrence)
@@ -142,7 +149,7 @@ fun NewEventPage(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Invite button, also sends you to list of friends
+            // Create event button, should send you to the Event's page
             Button(
                 onClick = {
                     try {
@@ -169,7 +176,7 @@ fun NewEventPage(
                     .fillMaxWidth()
                     .height(44.dp),
             ) {
-                Text("+ Invite", color = Color.White)
+                Text("Create Event", color = Color.White)
             }
         }
     }
@@ -180,8 +187,8 @@ fun handleCreateNewEvent(
     owner: String?,
     name: String,
     description: String,
-    startTime: String,
-    endTime: String,
+    startTime: Instant?,
+    endTime: Instant?,
     type: String,
     location: String,
     recurrence: String,
@@ -189,14 +196,16 @@ fun handleCreateNewEvent(
 ) {
     // Error checking
     if (owner.isNullOrBlank()) throw IllegalStateException("User not signed in")
+    if (startTime == null) throw IllegalStateException("Start time not provided")
+    if (endTime == null) throw IllegalStateException("Start time not provided")
 
     // Create a new event
     val event = Event(
         owner = owner.trim(),
         name = name.trim(),
         description = description.trim(),
-        startTime = Instant.parse(startTime.trim()),
-        endTime = Instant.parse(endTime.trim()),
+        startTime = startTime,
+        endTime = endTime,
         type = when (type) {
             "IRL" -> EventType.IRL
             "Virtual" -> EventType.VIRTUAL
