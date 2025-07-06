@@ -164,6 +164,7 @@ fun FriendListItem(friend: Friend, fullname: String, username: String) {
                 .size(48.dp)
                 .padding(end = 12.dp)
         )
+        // TODO: update UI to support display of different friend statuses ("ACCEPTED", "PENDING", "BLOCKED")
         Column {
             Text(text = fullname, fontWeight = FontWeight.Bold)
             Text(text = username, fontSize = 12.sp)
