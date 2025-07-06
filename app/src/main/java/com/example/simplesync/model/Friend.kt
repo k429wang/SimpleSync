@@ -9,8 +9,8 @@ import java.util.UUID
 
 @Serializable
 data class Friend(
-    @SerialName("user_id") val userId: String = UUID.randomUUID().toString(), // User ID
-    @SerialName("friend_id") val friendId: String = UUID.randomUUID().toString(), // User ID
+    @SerialName("user_id") val userId: String = UUID.randomUUID().toString(),
+    @SerialName("friend_id") val friendId: String = UUID.randomUUID().toString(),
     @SerialName("status") val status: Status,
     @Contextual @SerialName("created_at") val createdAt: Instant = Clock.System.now(),
 )
