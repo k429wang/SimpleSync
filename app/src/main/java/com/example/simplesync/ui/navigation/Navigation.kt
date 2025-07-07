@@ -1,6 +1,8 @@
 package com.example.simplesync.ui.navigation
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
@@ -50,6 +52,7 @@ fun rememberSimpleSyncNavController(
 
 // navigateUp is probably too complex for us to really need.
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SimpleSyncAppNav(
     modifier: Modifier = Modifier,
