@@ -3,14 +3,18 @@ package com.example.simplesync.ui.navigation
 import android.util.Log
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.example.simplesync.ui.pages.CalendarPage
 import com.example.simplesync.ui.pages.EventPage
@@ -25,6 +29,8 @@ import com.example.simplesync.ui.pages.SignUp
 import com.example.simplesync.ui.pages.UserProfile
 import com.example.simplesync.ui.pages.FriendsPage
 import com.example.simplesync.ui.pages.NotificationsPage
+import com.example.simplesync.ui.pages.EventDetailsPage
+import com.example.simplesync.viewmodel.EventViewModel
 
 /*
     The purpose of this function is to collect nav into a single, easy-to-use file,
@@ -120,13 +126,22 @@ fun SimpleSyncAppNav(
         }
         composable("${navController.EVENT_DETAILS}/{eventId}") { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId")
-            val event = /* fetch from shared ViewModel, or temp sampleEvents.find { it.id == eventId } */
 
-                if (event != null) {
-                    EventDetailsPage(navController, event)
-                } else {
-                    Text("Event not found.")
+            if (eventId != null) {
+                val viewModel: EventViewModel = hiltViewModel()
+                val event by viewModel.selectedEvent.collectAsState()
+
+                // Fetch when this composable loads
+                LaunchedEffect(eventId) {
+                    viewModel.fetchEventById(eventId)
                 }
+                when {
+                    event == null -> Text("Event not found or still loading")
+                    else -> EventDetailsPage(navController, event!!)
+                }
+            } else {
+                    Text("Missing event ID")
+            }
         }
     }
 }
