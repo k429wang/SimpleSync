@@ -118,6 +118,16 @@ fun SimpleSyncAppNav(
         composable(navController.NOTIFICATIONS) {
             NotificationsPage(navController)
         }
+        composable("${navController.EVENT_DETAILS}/{eventId}") { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId")
+            val event = /* fetch from shared ViewModel, or temp sampleEvents.find { it.id == eventId } */
+
+                if (event != null) {
+                    EventDetailsPage(navController, event)
+                } else {
+                    Text("Event not found.")
+                }
+        }
     }
 }
 
@@ -144,6 +154,10 @@ class SimpleSyncNavController(
     val EXTERNAL_SIGN_IN = "EXTERNAL_SIGN_IN"
     val FRIENDS = "FRIENDS"
     val NOTIFICATIONS = "NOTIFICATIONS"
+    val EVENT_DETAILS = "EVENT_DETAILS"
+
+    // Helper function to navigate to event details page based on event ID
+    fun eventDetailsRoute(eventId: String) = "$EVENT_DETAILS/$eventId"
 
     // and, for convenience, we also save the current page!
     // This is a kotlin class instead of a composable, so no need for statefulness
