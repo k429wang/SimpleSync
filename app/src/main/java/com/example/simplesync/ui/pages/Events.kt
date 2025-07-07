@@ -15,6 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +46,8 @@ fun EventPage(navController: SimpleSyncNavController) {
     LaunchedEffect(currUser) {
         currUser?.let {
             eventViewModel.fetchEventsForUser(it.authUser.id)
+            // TODO: Currently only fetches owned events.
+            //  Do we want to show invited/accepted events too?
         }
     }
     // Sample data
@@ -115,11 +119,10 @@ fun EventCard(event: Event, onClick: () -> Unit ) {
         modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.LightGray)
+            .background(Color.LightGray) // TODO: Change card colours or add background image
             .clickable { onClick() }
     ) {
-        // Date badge
+        // Date pill
         Text(
             text = formattedDate,
             color = Color.White,
@@ -127,23 +130,40 @@ fun EventCard(event: Event, onClick: () -> Unit ) {
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(8.dp)
-                .background(Color.DarkGray, RoundedCornerShape(12.dp))
+                .background(Color.DarkGray, RoundedCornerShape(25.dp))
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
-
-        // Event name and owner
+        // Event name, location, recurrence
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 16.dp)
         ) {
-            Text(text = event.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = event.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = when (event.visibility) {
+                        Visibility.SOLO -> Icons.Default.Person
+                        Visibility.PRIVATE -> Icons.Default.Lock
+                        Visibility.PUBLIC -> Icons.Default.Public
+                    },
+                    contentDescription = "Visibility",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
             event.location?.let {
                 Text(text = it, fontSize = 14.sp)
             }
+            Text(
+                text = event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() },
+                color = Color.Black,
+                fontSize = 14.sp
+            )
         }
 
-        // Bottom-right person icon
+        // TODO: Need to link to user pfp, currently just placeholder icon.
         Icon(
             imageVector = Icons.Default.Person,
             contentDescription = "Event Owner",
