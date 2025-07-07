@@ -1,5 +1,6 @@
 package com.example.simplesync.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplesync.model.Event
@@ -39,6 +40,7 @@ class EventViewModel @Inject constructor(
                 _eventResult.value = Result.success(true)
             } catch (e: Exception) {
                 _eventResult.value = Result.failure(e)
+                Log.e("EventViewModel", "Decoding failed", e)
             }
         }
     }

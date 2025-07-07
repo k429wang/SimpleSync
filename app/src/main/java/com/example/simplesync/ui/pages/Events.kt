@@ -42,9 +42,7 @@ fun EventPage(navController: SimpleSyncNavController) {
 
     LaunchedEffect(currUser) {
         currUser?.let {
-            Log.d("EventPage", "User UUID: ${it.authUser.id}")
             eventViewModel.fetchEventsForUser(it.authUser.id)
-            Log.d("EventPage", "User events: $events")
         }
     }
     // Sample data
