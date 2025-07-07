@@ -1,18 +1,13 @@
 package com.example.simplesync.ui.pages
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -28,6 +24,8 @@ import com.example.simplesync.model.Event
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.*
+import com.example.simplesync.viewmodel.EventViewModel
+import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,8 +34,19 @@ import java.util.Locale
 // Citation: built with ChatGPT 4o
 @Composable
 fun EventPage(navController: SimpleSyncNavController) {
+    val eventViewModel: EventViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
+    val currUser by userViewModel.currUser.collectAsState()
+    val events by eventViewModel.events.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
 
+    LaunchedEffect(currUser) {
+        currUser?.let {
+            Log.d("EventPage", "User UUID: ${it.authUser.id}")
+            eventViewModel.fetchEventsForUser(it.authUser.id)
+            Log.d("EventPage", "User events: $events")
+        }
+    }
     // Sample data
     val sampleEvents = listOf(
         Event(
@@ -81,7 +90,7 @@ fun EventPage(navController: SimpleSyncNavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Filter search based on event name or location
-            val filteredEvents = sampleEvents.filter {
+            val filteredEvents = events.filter {
                 it.name.contains(searchQuery, ignoreCase = true) ||
                         (it.location?.contains(searchQuery, ignoreCase = true) ?: false)
             }
