@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.auth.kt)
     implementation(libs.ktor.client.android)
 
+    // oauth services
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
     // hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
