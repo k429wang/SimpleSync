@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,7 +81,6 @@ fun EventPage(navController: SimpleSyncNavController) {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Title
             ScreenTitle("My events")
 
             SearchBar(searchQuery, onQueryChange = { searchQuery = it })
@@ -96,7 +96,9 @@ fun EventPage(navController: SimpleSyncNavController) {
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(filteredEvents) { event ->
-                    EventCard(event)
+                    EventCard(event = event, onClick = {
+                        navController.nav(navController.eventDetailsRoute(event.id))
+                    })
                 }
             }
         }
@@ -105,7 +107,7 @@ fun EventPage(navController: SimpleSyncNavController) {
 
 // Citation: built with ChatGPT 4o
 @Composable
-fun EventCard(event: Event) {
+fun EventCard(event: Event, onClick: () -> Unit ) {
     val formatter = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault())
     val formattedDate = formatter.format(Date(event.startTime.toEpochMilliseconds()))
 
@@ -115,6 +117,7 @@ fun EventCard(event: Event) {
             .height(160.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.LightGray)
+            .clickable { onClick() }
     ) {
         // Date badge
         Text(
