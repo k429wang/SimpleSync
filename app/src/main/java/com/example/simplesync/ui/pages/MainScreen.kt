@@ -1,5 +1,7 @@
 package com.example.simplesync.ui.pages
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -10,6 +12,7 @@ import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import dagger.hilt.android.EntryPointAccessors
 import io.github.jan.supabase.auth.auth
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(){//viewModel: AppViewModel) {
     val navController = rememberSimpleSyncNavController()
