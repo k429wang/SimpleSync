@@ -64,7 +64,8 @@ class UserViewModel @Inject constructor(
                 _error.value = e
                 onResult(null)
             }
-
+        }
+    }
     suspend fun getUserById(userId: String): UserMetadata? {
         return try {
             supabase.from("users").select {

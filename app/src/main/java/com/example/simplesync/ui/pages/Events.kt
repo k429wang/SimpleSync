@@ -1,5 +1,4 @@
 package com.example.simplesync.ui.pages
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -50,7 +49,6 @@ fun EventPage(navController: SimpleSyncNavController) {
             //  Do we want to show invited/accepted events too?
         }
     }
-    var searchQuery by remember { mutableStateOf("") }
 
     // Sample data
     val sampleEvents = listOf(
@@ -128,9 +126,6 @@ fun EventCard(event: Event, onClick: () -> Unit ) {
             .clickable { onClick() }
     ) {
         // Date pill
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.LightGray)
-    ) {
         Text(
             text = formattedDate,
             color = Color.White,
