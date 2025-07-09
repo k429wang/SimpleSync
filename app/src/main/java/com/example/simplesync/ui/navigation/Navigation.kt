@@ -24,6 +24,7 @@ import com.example.simplesync.ui.pages.SignIn
 import com.example.simplesync.ui.pages.SignUp
 import com.example.simplesync.ui.pages.UserProfile
 import com.example.simplesync.ui.pages.FriendsPage
+import com.example.simplesync.ui.pages.NotificationsPage
 
 /*
     The purpose of this function is to collect nav into a single, easy-to-use file,
@@ -114,6 +115,9 @@ fun SimpleSyncAppNav(
         composable(navController.FRIENDS) {
             FriendsPage(navController)
         }
+        composable(navController.NOTIFICATIONS) {
+            NotificationsPage(navController)
+        }
     }
 }
 
@@ -139,6 +143,7 @@ class SimpleSyncNavController(
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
     val EXTERNAL_SIGN_IN = "EXTERNAL_SIGN_IN"
     val FRIENDS = "FRIENDS"
+    val NOTIFICATIONS = "NOTIFICATIONS"
 
     // and, for convenience, we also save the current page!
     // This is a kotlin class instead of a composable, so no need for statefulness
