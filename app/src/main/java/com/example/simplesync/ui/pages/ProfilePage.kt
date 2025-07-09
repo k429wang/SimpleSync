@@ -1,8 +1,10 @@
 package com.example.simplesync.ui.pages
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -23,21 +25,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.AvailabilityGrid
+import com.example.simplesync.model.ConcreteCalendar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.UserViewModel
 
 
-class ProfilePage : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            ProfileScreen()
-        }
-    }
-}
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProfileScreen(navController: SimpleSyncNavController? = null) {
+fun ProfileScreen(navController: SimpleSyncNavController) {
     val viewModel: UserViewModel = hiltViewModel()
     val currUser by viewModel.currUser.collectAsState()
     val email = currUser?.authUser?.email
@@ -45,12 +41,12 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
 
     Scaffold(
         bottomBar = {
-            navController?.let { BottomNavBar(it) }
+            BottomNavBar(navController)
         }
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth().wrapContentHeight()
                 .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
@@ -117,9 +113,13 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             )
 
             // PLACE HOLDER FOR CALENDAR!!!!!!
-            // TODO: update with working calendar
             Spacer(modifier = Modifier.height(8.dp))
 
+            Card() {
+                AvailabilityGrid(navController, calendar = ConcreteCalendar())
+            }
+
+/*
             // Header Row for Days
             Row(modifier = Modifier.fillMaxWidth()) {
                 val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
@@ -152,7 +152,7 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
                     )
                 }
             }
-
+*/
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(

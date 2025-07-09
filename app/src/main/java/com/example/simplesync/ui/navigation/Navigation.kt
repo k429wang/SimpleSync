@@ -1,6 +1,8 @@
 package com.example.simplesync.ui.navigation
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.material3.Text
@@ -58,6 +60,7 @@ fun rememberSimpleSyncNavController(
 
 // navigateUp is probably too complex for us to really need.
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SimpleSyncAppNav(
     modifier: Modifier = Modifier,
@@ -198,12 +201,13 @@ class SimpleSyncNavController(
         navController.popBackStack()
     }
     fun nav(route: String){
+        Log.d("NAV", "Going to $route")
         navController.navigate( route ) {
             // prevents duplicates
             launchSingleTop = true
             restoreState = true
 
-            popUpTo(EVENTS) { saveState = true }
+            //popUpTo(EVENTS) { saveState = true }
         }
     }
 }
