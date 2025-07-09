@@ -25,8 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.model.TimeBlock
 import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
+import com.example.simplesync.viewmodel.EventViewModel
+import com.example.simplesync.viewmodel.UserViewModel
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -45,13 +50,53 @@ fun AvailabilityGrid(
 ) {
     // this needs requiresAPI calls. I want to update to not use this, ideally.
     // problem for future me.
+    val eventViewModel: EventViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
+    val currUser by userViewModel.currUser.collectAsState()
+    val events by eventViewModel.events.collectAsState()
+
+    var baseCalendar = remember {calendar}
+
+    // for each owned event, add it to our calendar.
+    // This isn't like, efficient, but it's good for demo purposes.
+    // startTime and endTime are instants so we just need to convert each.
+    // For now, we assume it's the one type of event that we have.
+    // This is actually still good design because converting allows us to
+    // get availability instead of making computing it super complex here.
+    val timeZone = TimeZone.currentSystemDefault()
+
+    val decoratedCalendar = remember(events, baseCalendar) {
+        var result = baseCalendar
+        for (event in events) {
+            val st = event.startTime.toLocalDateTime(timeZone)
+            val et = event.endTime.toLocalDateTime(timeZone)
+            result = DailyTimeSlot(
+                decorating = result,
+                startTime = LocalDateTime.of(st.year, st.month, st.dayOfMonth, st.hour, st.minute),
+                endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
+            )
+            Log.d("CAL", event.toString())
+        }
+        Log.d("CAL", events.toString())
+        result
+    }
+
+    LaunchedEffect(currUser) {
+        currUser?.let {
+            eventViewModel.fetchEventsForUser(it.authUser.id)
+            // TODO: Currently only fetches owned events.
+            //  Do we want to show invited/accepted events too?
+        }
+    }
+
     val today = remember { LocalDate.now() }
     // convoluted AI-made code, but it works
     val days = remember { (0 until 7).map { today.plusDays(it.toLong()) } }
     // This has been fixed up from garbage AI nonsense.
     val timeSlots : MutableList<LocalTime> = remember { mutableListOf() }
     // the passed value is vestigial - remove at some point
-    val availabilityData : MutableList<TimeBlock> = remember{ calendar.getAvailability(today.atTime(0,0)) }
+    //val availabilityData : MutableState<MutableList<TimeBlock>> = remember {mutableStateOf(decoratedCalendar.getAvailability(today.atTime(0,0)))}
+
 
     //
     Column(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
@@ -88,7 +133,7 @@ fun AvailabilityGrid(
                     navController = navController,
                     timeSlot = slot,
                     days = days,
-                    availabilityData = availabilityData,
+                    availabilityData = decoratedCalendar.getAvailability(today.atTime(0,0)),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
