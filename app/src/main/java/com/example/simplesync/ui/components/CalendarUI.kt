@@ -1,6 +1,7 @@
 package com.example.simplesync.ui.components
 
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
+import android.util.Log
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.simplesync.model.AbstractCalendar
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,7 +54,7 @@ fun AvailabilityGrid(
     val availabilityData : MutableList<TimeBlock> = remember{ calendar.getAvailability(today.atTime(0,0)) }
 
     //
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
         // Day headers - makes sense to keep these, but pared down. No need for day-by-day,
         // we can just do Mon-Sun, no need for dates. Too much info.
         Row(
@@ -71,7 +73,7 @@ fun AvailabilityGrid(
         // I think it might be better to do it one column at a time, though.
         // I think that ends up being more efficient, but this is fine for now.
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().
+            modifier = Modifier.fillMaxWidth().height(400.dp).
             background(color= Color(0XD3D3D3FF), shape= RoundedCornerShape(4.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
 
@@ -109,6 +111,7 @@ private fun DayHeader(day: LocalDate, modifier: Modifier = Modifier) {
             text = formatter.format(day),
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
+            style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center
         )
     }
@@ -136,15 +139,15 @@ private fun TimeSlotRow(
 
         // Time slot cells
         days.forEach { day ->
-            var flag = false
+            var flag = true
             availabilityData.forEach{ block ->
-                // if this is true, then the block is within an availability zone
+                // if this is true, then the block is within an availability zone, should be red
                 if (timeSlot >= block.startTime.toLocalTime() && timeSlot <= block.endTime.toLocalTime()){
-                    flag = true
+                    flag = false
                 }
             }
 
-            val color = if (flag) Color(0xFFF44336) else Color(0xFF4CAF50)
+            val color = if (flag) Color(0xFF4CAF50) else Color(0xFFF44336)
 
             // This box component is not ideal, but it's serviceable.
             // A horizontalDivider is better, but not interactable.
@@ -153,18 +156,20 @@ private fun TimeSlotRow(
             // That works tbh.
             Box(
                 modifier = Modifier
+                    .height(10.dp)
+                    .width(20.dp)
                     .weight(1f)
                     .aspectRatio(1f)
-                    //.border(1.dp, Color.LightGray)
                     .background(color)
-                    //.padding(2.dp)
                     .clickable{
                         // do something! Redirect to a page to add
                         // an event, or modify that event.
+                        Log.d("CAL","Flag is set to: $flag")
                         if (flag) {
+                            Log.d("CAL", "Calling NavController")
                             navController.nav(navController.NEW_EVENT)
                         } else {
-                            // navigate to specific event this
+                            // navigate to specific event this refers to
                         }
                     }
 

@@ -201,12 +201,13 @@ class SimpleSyncNavController(
         navController.popBackStack()
     }
     fun nav(route: String){
+        Log.d("NAV", "Going to $route")
         navController.navigate( route ) {
             // prevents duplicates
             launchSingleTop = true
             restoreState = true
 
-            popUpTo(EVENTS) { saveState = true }
+            //popUpTo(EVENTS) { saveState = true }
         }
     }
 }
