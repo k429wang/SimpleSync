@@ -50,4 +50,31 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
+    fun fetchUserMetadataById(userId: String, onResult: (UserMetadata?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val metadata = supabase.from("users").select {
+                    filter {
+                        eq("id", userId)
+                    }
+                }.decodeSingle<UserMetadata>()
+                onResult(metadata)
+            } catch (e: Exception) {
+                _error.value = e
+                onResult(null)
+            }
+        }
+    }
+    suspend fun getUserById(userId: String): UserMetadata? {
+        return try {
+            supabase.from("users").select {
+                filter { eq("id", userId) }
+                limit(1)
+            }.decodeSingleOrNull()
+        } catch (e: Exception) {
+            _error.value = e
+            null
+        }
+    }
 }

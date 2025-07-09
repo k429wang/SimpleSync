@@ -21,7 +21,7 @@ class SignUpViewModel @Inject constructor(
     private val _signUpResult = MutableStateFlow<Result<Boolean>?>(null)
     val signUpResult: StateFlow<Result<Boolean>?> = _signUpResult
 
-    fun signUp(email: String, firstName: String, lastName: String, password: String) {
+    fun signUp(email: String, username: String, firstName: String, lastName: String, password: String) {
         viewModelScope.launch {
             try {
                 supabaseClient.auth.signUpWith(Email) {
@@ -29,6 +29,7 @@ class SignUpViewModel @Inject constructor(
                     this.password = password
                     // Package data for Users table for SQL trigger
                     this.data = buildJsonObject {
+                        put("username", JsonPrimitive(username))
                         put("first_name", JsonPrimitive(firstName))
                         put("last_name", JsonPrimitive(lastName))
                     }

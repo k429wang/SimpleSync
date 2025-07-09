@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -25,16 +30,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignIn(
     navController: SimpleSyncNavController,
-    viewModel: SignInViewModel = hiltViewModel()
+    viewModel: SignInViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var shouldShowPassword by remember { mutableStateOf(false) }
 
     val signInResult by viewModel.signInResult.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -46,6 +56,7 @@ fun SignIn(
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Signed in successfully!")
                 }
+                userViewModel.fetchCurrentUser() // Set currUser in userViewModel
                 navController.nav(navController.HOME) // Go to home screen
             }.onFailure { e ->
                 coroutineScope.launch {
@@ -71,11 +82,22 @@ fun SignIn(
                 modifier = Modifier.fillMaxWidth()
             )
 
+
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                // Button to toggle visibility of password
+                trailingIcon = {
+                    val icon = if (shouldShowPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
+                    val desc = if (shouldShowPassword) "Hide Password" else "Show Password"
+
+                    IconButton(onClick = {shouldShowPassword = !shouldShowPassword}) {
+                        Icon(imageVector = icon, contentDescription = desc)
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))

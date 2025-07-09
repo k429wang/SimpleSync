@@ -21,9 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
-
+import com.example.simplesync.viewmodel.UserViewModel
 
 
 class ProfilePage : ComponentActivity() {
@@ -37,6 +38,11 @@ class ProfilePage : ComponentActivity() {
 
 @Composable
 fun ProfileScreen(navController: SimpleSyncNavController? = null) {
+    val viewModel: UserViewModel = hiltViewModel()
+    val currUser by viewModel.currUser.collectAsState()
+    val email = currUser?.authUser?.email
+    val username = currUser?.userMetadata?.username
+
     Scaffold(
         bottomBar = {
             navController?.let { BottomNavBar(it) }
@@ -56,17 +62,18 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             ) {
                 Column {
                     Text(
-                        "Profile",
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                        text = "Profile",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "user@example.com",
+                        text = email ?: "Unknown email",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "@username",
+                        text = "@${username ?: "Unknown user"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
@@ -110,6 +117,7 @@ fun ProfileScreen(navController: SimpleSyncNavController? = null) {
             )
 
             // PLACE HOLDER FOR CALENDAR!!!!!!
+            // TODO: update with working calendar
             Spacer(modifier = Modifier.height(8.dp))
 
             // Header Row for Days
@@ -209,10 +217,4 @@ fun SettingsOption(text: String, onClick: () -> Unit = {}) {
             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfilePreview() {
-    ProfileScreen()
 }

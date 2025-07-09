@@ -8,6 +8,7 @@ import io.github.jan.supabase.auth.user.UserInfo
 @Serializable
 data class UserMetadata(
     @SerialName("id") val id: String,
+    @SerialName("username") val username: String,
     @SerialName("first_name") val firstName: String,
     @SerialName("last_name") val lastName: String,
 )
