@@ -57,7 +57,7 @@ fun SignIn(
                     snackbarHostState.showSnackbar("Signed in successfully!")
                 }
                 userViewModel.fetchCurrentUser() // Set currUser in userViewModel
-                navController.nav(navController.HOME) // Go to home screen
+                navController.nav(navController.EVENTS) // Go to home screen
             }.onFailure { e ->
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Error: ${e.message}")

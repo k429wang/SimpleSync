@@ -1,6 +1,7 @@
 package com.example.simplesync.ui.components
 
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
+import android.util.Log
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.simplesync.model.AbstractCalendar
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,8 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.model.TimeBlock
 import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
+import com.example.simplesync.viewmodel.EventViewModel
+import com.example.simplesync.viewmodel.UserViewModel
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.TimeZone
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -43,16 +50,56 @@ fun AvailabilityGrid(
 ) {
     // this needs requiresAPI calls. I want to update to not use this, ideally.
     // problem for future me.
+    val eventViewModel: EventViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
+    val currUser by userViewModel.currUser.collectAsState()
+    val events by eventViewModel.events.collectAsState()
+
+    var baseCalendar = remember {calendar}
+
+    // for each owned event, add it to our calendar.
+    // This isn't like, efficient, but it's good for demo purposes.
+    // startTime and endTime are instants so we just need to convert each.
+    // For now, we assume it's the one type of event that we have.
+    // This is actually still good design because converting allows us to
+    // get availability instead of making computing it super complex here.
+    val timeZone = TimeZone.currentSystemDefault()
+
+    val decoratedCalendar = remember(events, baseCalendar) {
+        var result = baseCalendar
+        for (event in events) {
+            val st = event.startTime.toLocalDateTime(timeZone)
+            val et = event.endTime.toLocalDateTime(timeZone)
+            result = DailyTimeSlot(
+                decorating = result,
+                startTime = LocalDateTime.of(st.year, st.month, st.dayOfMonth, st.hour, st.minute),
+                endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
+            )
+            Log.d("CAL", event.toString())
+        }
+        Log.d("CAL", events.toString())
+        result
+    }
+
+    LaunchedEffect(currUser) {
+        currUser?.let {
+            eventViewModel.fetchEventsForUser(it.authUser.id)
+            // TODO: Currently only fetches owned events.
+            //  Do we want to show invited/accepted events too?
+        }
+    }
+
     val today = remember { LocalDate.now() }
     // convoluted AI-made code, but it works
     val days = remember { (0 until 7).map { today.plusDays(it.toLong()) } }
     // This has been fixed up from garbage AI nonsense.
     val timeSlots : MutableList<LocalTime> = remember { mutableListOf() }
     // the passed value is vestigial - remove at some point
-    val availabilityData : MutableList<TimeBlock> = remember{ calendar.getAvailability(today.atTime(0,0)) }
+    //val availabilityData : MutableState<MutableList<TimeBlock>> = remember {mutableStateOf(decoratedCalendar.getAvailability(today.atTime(0,0)))}
+
 
     //
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
         // Day headers - makes sense to keep these, but pared down. No need for day-by-day,
         // we can just do Mon-Sun, no need for dates. Too much info.
         Row(
@@ -71,7 +118,7 @@ fun AvailabilityGrid(
         // I think it might be better to do it one column at a time, though.
         // I think that ends up being more efficient, but this is fine for now.
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().
+            modifier = Modifier.fillMaxWidth().height(400.dp).
             background(color= Color(0XD3D3D3FF), shape= RoundedCornerShape(4.dp)),
             verticalArrangement = Arrangement.spacedBy(2.dp)
 
@@ -86,7 +133,7 @@ fun AvailabilityGrid(
                     navController = navController,
                     timeSlot = slot,
                     days = days,
-                    availabilityData = availabilityData,
+                    availabilityData = decoratedCalendar.getAvailability(today.atTime(0,0)),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -109,6 +156,7 @@ private fun DayHeader(day: LocalDate, modifier: Modifier = Modifier) {
             text = formatter.format(day),
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
+            style = MaterialTheme.typography.bodySmall,
             textAlign = TextAlign.Center
         )
     }
@@ -136,15 +184,15 @@ private fun TimeSlotRow(
 
         // Time slot cells
         days.forEach { day ->
-            var flag = false
+            var flag = true
             availabilityData.forEach{ block ->
-                // if this is true, then the block is within an availability zone
+                // if this is true, then the block is within an availability zone, should be red
                 if (timeSlot >= block.startTime.toLocalTime() && timeSlot <= block.endTime.toLocalTime()){
-                    flag = true
+                    flag = false
                 }
             }
 
-            val color = if (flag) Color(0xFFF44336) else Color(0xFF4CAF50)
+            val color = if (flag) Color(0xFF4CAF50) else Color(0xFFF44336)
 
             // This box component is not ideal, but it's serviceable.
             // A horizontalDivider is better, but not interactable.
@@ -153,18 +201,20 @@ private fun TimeSlotRow(
             // That works tbh.
             Box(
                 modifier = Modifier
+                    .height(10.dp)
+                    .width(20.dp)
                     .weight(1f)
                     .aspectRatio(1f)
-                    //.border(1.dp, Color.LightGray)
                     .background(color)
-                    //.padding(2.dp)
                     .clickable{
                         // do something! Redirect to a page to add
                         // an event, or modify that event.
+                        Log.d("CAL","Flag is set to: $flag")
                         if (flag) {
+                            Log.d("CAL", "Calling NavController")
                             navController.nav(navController.NEW_EVENT)
                         } else {
-                            // navigate to specific event this
+                            // navigate to specific event this refers to
                         }
                     }
 
