@@ -3,24 +3,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.Icons
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -28,6 +26,8 @@ import com.example.simplesync.model.Event
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.*
+import com.example.simplesync.viewmodel.EventViewModel
+import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,7 +36,19 @@ import java.util.Locale
 // Citation: built with ChatGPT 4o
 @Composable
 fun EventPage(navController: SimpleSyncNavController) {
+    val eventViewModel: EventViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
+    val currUser by userViewModel.currUser.collectAsState()
+    val events by eventViewModel.events.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+
+    LaunchedEffect(currUser) {
+        currUser?.let {
+            eventViewModel.fetchEventsForUser(it.authUser.id)
+            // TODO: Currently only fetches owned events.
+            //  Do we want to show invited/accepted events too?
+        }
+    }
 
     // Sample data
     val sampleEvents = listOf(
@@ -73,7 +85,7 @@ fun EventPage(navController: SimpleSyncNavController) {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Title
+
             ScreenTitle("My events")
 
             SearchBar(searchQuery, onQueryChange = { searchQuery = it })
@@ -81,7 +93,8 @@ fun EventPage(navController: SimpleSyncNavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Filter search based on event name or location
-            val filteredEvents = sampleEvents.filter {
+            val filteredEvents = events.filter {
+
                 it.name.contains(searchQuery, ignoreCase = true) ||
                         (it.location?.contains(searchQuery, ignoreCase = true) ?: false)
             }
@@ -89,7 +102,10 @@ fun EventPage(navController: SimpleSyncNavController) {
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 items(filteredEvents) { event ->
-                    EventCard(event)
+                    EventCard(event = event, onClick = {
+                        navController.nav(navController.eventDetailsRoute(event.id))
+                    })
+
                 }
             }
         }
@@ -98,7 +114,7 @@ fun EventPage(navController: SimpleSyncNavController) {
 
 // Citation: built with ChatGPT 4o
 @Composable
-fun EventCard(event: Event) {
+fun EventCard(event: Event, onClick: () -> Unit ) {
     val formatter = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault())
     val formattedDate = formatter.format(Date(event.startTime.toEpochMilliseconds()))
 
@@ -106,10 +122,10 @@ fun EventCard(event: Event) {
         modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.LightGray)
+            .background(Color.LightGray) // TODO: Change card colours or add background image
+            .clickable { onClick() }
     ) {
-        // Date badge
+        // Date pill
         Text(
             text = formattedDate,
             color = Color.White,
@@ -117,23 +133,40 @@ fun EventCard(event: Event) {
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(8.dp)
-                .background(Color.DarkGray, RoundedCornerShape(12.dp))
+                .background(Color.DarkGray, RoundedCornerShape(25.dp))
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
-
-        // Event name and owner
+        // Event name, location, recurrence
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(start = 16.dp)
         ) {
-            Text(text = event.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = event.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = when (event.visibility) {
+                        Visibility.SOLO -> Icons.Default.Person
+                        Visibility.PRIVATE -> Icons.Default.Lock
+                        Visibility.PUBLIC -> Icons.Default.Public
+                    },
+                    contentDescription = "Visibility",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
             event.location?.let {
                 Text(text = it, fontSize = 14.sp)
             }
+            Text(
+                text = event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() },
+                color = Color.Black,
+                fontSize = 14.sp
+            )
         }
 
-        // Bottom-right person icon
+        // TODO: Need to link to user pfp, currently just placeholder icon.
         Icon(
             imageVector = Icons.Default.Person,
             contentDescription = "Event Owner",

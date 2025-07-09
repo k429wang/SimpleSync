@@ -1,5 +1,6 @@
 package com.example.simplesync.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplesync.model.Event
@@ -18,7 +19,9 @@ class EventViewModel @Inject constructor(
     private val supabase: SupabaseClient
 ) : ViewModel() {
     private val _events = MutableStateFlow<List<Event>>(emptyList())
+    private val _selectedEvent = MutableStateFlow<Event?>(null)
     val events: StateFlow<List<Event>> = _events
+    val selectedEvent: StateFlow<Event?> = _selectedEvent
 
     // Used to display success/failure messages
     private val _eventResult = MutableStateFlow<Result<Boolean>?>(null)
@@ -37,6 +40,25 @@ class EventViewModel @Inject constructor(
                 _eventResult.value = Result.success(true)
             } catch (e: Exception) {
                 _eventResult.value = Result.failure(e)
+                Log.e("EventViewModel", "Decoding failed", e)
+            }
+        }
+    }
+    // Retrieve event based on event ID
+    fun fetchEventById(eventId: String) {
+        viewModelScope.launch {
+            try {
+                val fetched = supabase.from(EVENTS_TABLE).select {
+                    filter {
+                        eq("id", eventId)
+                    }
+                    limit(1)
+                }.decodeSingle<Event>()
+
+                _selectedEvent.value = fetched
+            } catch (e: Exception) {
+                // Handle failure in frontend, since it's a simple targeted fetch
+                _selectedEvent.value = null
             }
         }
     }
