@@ -50,6 +50,7 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
     fun fetchUserMetadataById(userId: String, onResult: (UserMetadata?) -> Unit) {
         viewModelScope.launch {
             try {
@@ -63,6 +64,16 @@ class UserViewModel @Inject constructor(
                 _error.value = e
                 onResult(null)
             }
+
+    suspend fun getUserById(userId: String): UserMetadata? {
+        return try {
+            supabase.from("users").select {
+                filter { eq("id", userId) }
+                limit(1)
+            }.decodeSingleOrNull()
+        } catch (e: Exception) {
+            _error.value = e
+            null
         }
     }
 }

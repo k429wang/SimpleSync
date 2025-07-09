@@ -50,6 +50,8 @@ fun EventPage(navController: SimpleSyncNavController) {
             //  Do we want to show invited/accepted events too?
         }
     }
+    var searchQuery by remember { mutableStateOf("") }
+
     // Sample data
     val sampleEvents = listOf(
         Event(
@@ -85,6 +87,7 @@ fun EventPage(navController: SimpleSyncNavController) {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
+
             ScreenTitle("My events")
 
             SearchBar(searchQuery, onQueryChange = { searchQuery = it })
@@ -93,6 +96,7 @@ fun EventPage(navController: SimpleSyncNavController) {
 
             // Filter search based on event name or location
             val filteredEvents = events.filter {
+
                 it.name.contains(searchQuery, ignoreCase = true) ||
                         (it.location?.contains(searchQuery, ignoreCase = true) ?: false)
             }
@@ -103,6 +107,7 @@ fun EventPage(navController: SimpleSyncNavController) {
                     EventCard(event = event, onClick = {
                         navController.nav(navController.eventDetailsRoute(event.id))
                     })
+
                 }
             }
         }
@@ -123,6 +128,9 @@ fun EventCard(event: Event, onClick: () -> Unit ) {
             .clickable { onClick() }
     ) {
         // Date pill
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.LightGray)
+    ) {
         Text(
             text = formattedDate,
             color = Color.White,
