@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.UserViewModel
+import com.example.simplesync.ui.components.ProfilePicture
 
 
 @Composable
@@ -28,21 +29,27 @@ fun MyAccountPage(navController: SimpleSyncNavController) {
     Scaffold (
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(
+            modifier = Modifier.padding(padding)
+        ) {
             Text("User Profile Page", style = MaterialTheme.typography.headlineSmall)
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            UserDetails(viewModel)
+            UserDetails(viewModel, snackbarHostState)
         }
     }
 }
 
 @Composable
-fun UserDetails(viewModel: UserViewModel = hiltViewModel()) {
+fun UserDetails(
+    viewModel: UserViewModel = hiltViewModel(),
+    snackbarHostState: SnackbarHostState
+) {
     val currUser by viewModel.currUser.collectAsState()
 
-    Text("User Details:")
+    Text("My Account:")
+
+    ProfilePicture(viewModel, snackbarHostState)
 
     currUser?.let { user ->
         val authUser = user.authUser
