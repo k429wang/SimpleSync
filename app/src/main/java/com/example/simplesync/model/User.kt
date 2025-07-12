@@ -11,7 +11,7 @@ data class UserMetadata(
     @SerialName("username") val username: String,
     @SerialName("first_name") val firstName: String,
     @SerialName("last_name") val lastName: String,
-    @SerialName("profile_pic_url") val profilePicURL: String,
+    @SerialName("profile_pic_url") val profilePicURL: String? = null,
 )
 
 // Combined data model

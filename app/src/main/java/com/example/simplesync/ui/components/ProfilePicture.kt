@@ -72,7 +72,7 @@ fun ProfilePicture(
     }
 
     val imageUrl = currUser?.userMetadata?.profilePicURL
-    val hasProfilePic = !imageUrl.isNullOrBlank()
+    val hasProfilePic = !imageUrl.isNullOrBlank() && imageUrl != "null"
 
     Box (
         modifier = Modifier
