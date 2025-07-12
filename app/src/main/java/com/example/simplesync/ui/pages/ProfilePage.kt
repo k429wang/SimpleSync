@@ -187,7 +187,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
 
             HorizontalDivider()
             SettingsOption("My Account") {
-                navController?.nav(navController.USER_PROFILE)
+                navController?.nav(navController.MY_ACCOUNT)
             }
             HorizontalDivider()
             SettingsOption("Privacy")

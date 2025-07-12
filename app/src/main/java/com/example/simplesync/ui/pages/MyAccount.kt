@@ -21,7 +21,7 @@ import com.example.simplesync.viewmodel.UserViewModel
 
 
 @Composable
-fun UserProfile(navController: SimpleSyncNavController) {
+fun MyAccountPage(navController: SimpleSyncNavController) {
     val viewModel: UserViewModel = hiltViewModel()
     val snackbarHostState = remember { SnackbarHostState() }
 
