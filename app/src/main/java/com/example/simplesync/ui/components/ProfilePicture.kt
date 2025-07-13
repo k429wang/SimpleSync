@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -36,7 +35,6 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-import java.io.InputStream
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
@@ -56,10 +54,11 @@ fun ProfilePicture(
     ) { uri: Uri? ->
         imageUri = uri
         uri?.let {
-            val inputStream: InputStream? = context.contentResolver.openInputStream(it)
-            inputStream?.use { stream ->
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bytes = inputStream?.use { stream -> stream.readBytes() }
+            bytes?.let {
                 scope.launch {
-                    val success = viewModel.uploadProfilePicture(stream)
+                    val success = viewModel.uploadProfilePicture(it)
                     if (success) {
                         snackbarHostState.showSnackbar("Profile picture updated")
                         viewModel.fetchCurrentUser() // Refresh from Supabase
@@ -71,7 +70,12 @@ fun ProfilePicture(
         }
     }
 
-    val imageUrl = currUser?.userMetadata?.profilePicURL
+    val imageUrl = currUser?.userMetadata?.profilePicURL?.let {
+        // Add cache busting suffix to make the URL appear new to Coil
+        // everytime currUser updates (which it does in uploadProfilePicture)
+        if (it.isNotBlank()) "$it?t=${System.currentTimeMillis()}" else null
+    }
+
     val hasProfilePic = !imageUrl.isNullOrBlank() && imageUrl != "null"
 
     Box (
@@ -81,6 +85,7 @@ fun ProfilePicture(
             .clickable { imagePickerLauncher.launch("image/*") }
     ) {
         if (hasProfilePic) {
+            // Display the user's stored profile picture
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(imageUrl)
@@ -93,6 +98,7 @@ fun ProfilePicture(
                     .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
             )
         } else {
+            // Display the default profile picture
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -110,19 +116,22 @@ fun ProfilePicture(
         }
 
         // Edit Icon Button overlay (top-right corner)
-        IconButton(
-            onClick = { imagePickerLauncher.launch("image/*") },
+        Box(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 6.dp, y = (-6).dp)
-                .size(28.dp)
-                .background(Color.White, CircleShape)
+                .align(Alignment.BottomEnd)
+                .offset(x = (-20).dp, y = (-16).dp)
+                .size(22.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                .clickable { imagePickerLauncher.launch("image/*") },
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = "Edit Profile Picture",
-                tint = Color.Black,
-                modifier = Modifier.size(16.dp)
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(12.dp)
             )
         }
     }

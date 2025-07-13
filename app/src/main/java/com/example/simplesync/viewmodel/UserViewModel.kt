@@ -12,7 +12,6 @@ import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.InputStream
 import javax.inject.Inject
 
 var USERS_TABLE_NAME = "users"
@@ -42,10 +41,10 @@ class UserViewModel @Inject constructor(
                 // Retrieve user from public.users
                 val userId = authUser.id
                 val metadata = supabase.from(USERS_TABLE_NAME).select {
-                        filter{
-                            eq("id", userId)
-                        }
+                    filter {
+                        eq("id", userId)
                     }
+                }
                     .decodeSingle<UserMetadata>()
 
                 _currUser.value = FullUser(authUser, metadata)
@@ -83,33 +82,33 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    suspend fun uploadProfilePicture(inputStream: InputStream): Boolean {
-        val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no current user
-        val fileBytes = inputStream.readBytes()
-        val filePath = "$userId.jpg"
+    suspend fun uploadProfilePicture(imageBytes: ByteArray): Boolean {
+        val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no user
+        val filePath = "$userId/profile_pic.jpg" // profile-pictures/<user-id>/profile_pic.jpg
 
         return try {
+            // Upload to profile-pictures bucket
             supabase.storage.from(PFP_BUCKET_NAME)
-                .upload(filePath, fileBytes)
+                .upload(filePath, imageBytes) {
+                    upsert=true
+                }
 
             val publicUrl = supabase.storage.from(PFP_BUCKET_NAME)
                 .publicUrl(filePath)
 
-            // Update User metadata
+            // Add profile picture's public URL to Users table
             supabase.from(USERS_TABLE_NAME).update(
                 {
                     set("profile_pic_url", publicUrl)
                 }
             ) {
-                filter {
-                    eq("id", userId)
-                }
+                filter { eq("id", userId) }
             }
+
             true
         } catch (e: Exception) {
             e.printStackTrace()
             false
         }
-
     }
 }
