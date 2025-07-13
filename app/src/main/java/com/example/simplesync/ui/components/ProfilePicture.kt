@@ -135,7 +135,4 @@ fun ProfilePicture(
             )
         }
     }
-
-    Spacer(modifier = Modifier.height(8.dp))
-    Text("Click to update", style = MaterialTheme.typography.bodySmall)
 }
