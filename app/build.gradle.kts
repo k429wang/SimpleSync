@@ -75,6 +75,7 @@ dependencies {
     implementation(platform(libs.bom))
     implementation(libs.supabase.postgrest.kt)
     implementation(libs.auth.kt)
+    implementation(libs.storage.kt)
     implementation(libs.ktor.client.android)
 
     // oauth services
@@ -87,4 +88,8 @@ dependencies {
 
     // icons
     implementation(libs.androidx.material.icons.extended)
+
+    // coil for image loading
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }

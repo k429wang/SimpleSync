@@ -8,11 +8,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+var USERS_TABLE_NAME = "users"
+var PFP_BUCKET_NAME = "profile-pictures"
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
@@ -37,11 +40,11 @@ class UserViewModel @Inject constructor(
 
                 // Retrieve user from public.users
                 val userId = authUser.id
-                val metadata = supabase.from("users").select {
-                        filter{
-                            eq("id", userId)
-                        }
+                val metadata = supabase.from(USERS_TABLE_NAME).select {
+                    filter {
+                        eq("id", userId)
                     }
+                }
                     .decodeSingle<UserMetadata>()
 
                 _currUser.value = FullUser(authUser, metadata)
@@ -54,7 +57,7 @@ class UserViewModel @Inject constructor(
     fun fetchUserMetadataById(userId: String, onResult: (UserMetadata?) -> Unit) {
         viewModelScope.launch {
             try {
-                val metadata = supabase.from("users").select {
+                val metadata = supabase.from(USERS_TABLE_NAME).select {
                     filter {
                         eq("id", userId)
                     }
@@ -66,15 +69,46 @@ class UserViewModel @Inject constructor(
             }
         }
     }
+
     suspend fun getUserById(userId: String): UserMetadata? {
         return try {
-            supabase.from("users").select {
+            supabase.from(USERS_TABLE_NAME).select {
                 filter { eq("id", userId) }
                 limit(1)
             }.decodeSingleOrNull()
         } catch (e: Exception) {
             _error.value = e
             null
+        }
+    }
+
+    suspend fun uploadProfilePicture(imageBytes: ByteArray): Boolean {
+        val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no user
+        val filePath = "$userId/profile_pic.jpg" // profile-pictures/<user-id>/profile_pic.jpg
+
+        return try {
+            // Upload to profile-pictures bucket
+            supabase.storage.from(PFP_BUCKET_NAME)
+                .upload(filePath, imageBytes) {
+                    upsert=true
+                }
+
+            val publicUrl = supabase.storage.from(PFP_BUCKET_NAME)
+                .publicUrl(filePath)
+
+            // Add profile picture's public URL to Users table
+            supabase.from(USERS_TABLE_NAME).update(
+                {
+                    set("profile_pic_url", publicUrl)
+                }
+            ) {
+                filter { eq("id", userId) }
+            }
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 }

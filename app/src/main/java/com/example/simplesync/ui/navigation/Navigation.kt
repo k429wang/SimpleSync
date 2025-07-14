@@ -28,7 +28,7 @@ import com.example.simplesync.ui.pages.SearchPage
 import com.example.simplesync.ui.pages.SettingsPage
 import com.example.simplesync.ui.pages.SignIn
 import com.example.simplesync.ui.pages.SignUp
-import com.example.simplesync.ui.pages.UserProfile
+import com.example.simplesync.ui.pages.MyAccountPage
 import com.example.simplesync.ui.pages.FriendsPage
 import com.example.simplesync.ui.pages.NotificationsPage
 import com.example.simplesync.ui.pages.EventDetailsPage
@@ -115,8 +115,8 @@ fun SimpleSyncAppNav(
         composable(navController.SIGN_UP) {
             SignUp(navController)
         }
-        composable(navController.USER_PROFILE) {
-            UserProfile(navController)
+        composable(navController.MY_ACCOUNT) {
+            MyAccountPage(navController)
         }
         composable(navController.EXTERNAL_SIGN_IN) {
             ExternalCalendarSyncPage(navController)
@@ -167,7 +167,7 @@ class SimpleSyncNavController(
     val SETTINGS = "SETTINGS"
     val SEARCH = "SEARCH"
     val PROFILE = "PROFILE"
-    val USER_PROFILE = "USER_PROFILE"
+    val MY_ACCOUNT = "MY_ACCOUNT"
     val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
     val EXTERNAL_SIGN_IN = "EXTERNAL_SIGN_IN"
     val FRIENDS = "FRIENDS"

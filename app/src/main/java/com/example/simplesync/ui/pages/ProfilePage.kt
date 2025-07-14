@@ -1,32 +1,21 @@
 package com.example.simplesync.ui.pages
 
 import android.os.Build
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.components.AvailabilityGrid
 import com.example.simplesync.model.ConcreteCalendar
+import com.example.simplesync.ui.components.ProfilePicture
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.UserViewModel
 
@@ -38,18 +27,20 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
     val currUser by viewModel.currUser.collectAsState()
     val email = currUser?.authUser?.email
     val username = currUser?.userMetadata?.username
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomNavBar(navController)
         }
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth().wrapContentHeight()
+                .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
             // Header Row
             Row(
@@ -75,34 +66,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Profile Picture",
-                        modifier = Modifier.size(40.dp)
-                    )
-
-                    IconButton(
-                        onClick = { /* TODO: edit profile */ },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .offset(x = 6.dp, y = (-6).dp)
-                            .size(24.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = Color.Black,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                ProfilePicture(viewModel, snackbarHostState)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -187,7 +151,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
 
             HorizontalDivider()
             SettingsOption("My Account") {
-                navController?.nav(navController.USER_PROFILE)
+                navController.nav(navController.MY_ACCOUNT)
             }
             HorizontalDivider()
             SettingsOption("Privacy")
@@ -195,7 +159,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
             SettingsOption("Notification Settings")
             HorizontalDivider()
             SettingsOption("External Calendar Sign-in") {
-                navController?.nav(navController.EXTERNAL_SIGN_IN)
+                navController.nav(navController.EXTERNAL_SIGN_IN)
             }
             HorizontalDivider()
 
