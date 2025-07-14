@@ -7,7 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
@@ -37,10 +37,10 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
     ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth().wrapContentHeight()
+                .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
                 .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
             // Header Row
             Row(
@@ -151,7 +151,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
 
             HorizontalDivider()
             SettingsOption("My Account") {
-                navController?.nav(navController.MY_ACCOUNT)
+                navController.nav(navController.MY_ACCOUNT)
             }
             HorizontalDivider()
             SettingsOption("Privacy")
@@ -159,7 +159,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
             SettingsOption("Notification Settings")
             HorizontalDivider()
             SettingsOption("External Calendar Sign-in") {
-                navController?.nav(navController.EXTERNAL_SIGN_IN)
+                navController.nav(navController.EXTERNAL_SIGN_IN)
             }
             HorizontalDivider()
 
