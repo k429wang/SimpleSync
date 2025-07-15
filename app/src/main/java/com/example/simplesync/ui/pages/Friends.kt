@@ -1,13 +1,10 @@
 package com.example.simplesync.ui.pages
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,14 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TextField
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.model.Friend
 import com.example.simplesync.model.UserMetadata
+import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendsViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 
@@ -117,42 +113,6 @@ fun FriendsPage(
 
         }
     }
-
-@Composable
-fun SearchBar(searchQuery: String, onQueryChange: (String) -> Unit) {
-    TextField(
-        value = searchQuery,
-        onValueChange = onQueryChange,
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = Color.Gray
-            )
-        },
-        placeholder = {
-            Text(
-                "Search",
-                color = Color.Gray,
-                fontSize = 16.sp
-            )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
-            .border(1.dp, Color.Black, shape = RoundedCornerShape(24.dp)),
-        shape = RoundedCornerShape(24.dp),
-        singleLine = true,
-        textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
-        )
-    )
-}
 
 @Composable
 fun FriendListItem(friend: Friend, fullname: String, username: String) {
