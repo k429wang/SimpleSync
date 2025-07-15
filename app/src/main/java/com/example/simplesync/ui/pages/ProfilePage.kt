@@ -36,7 +36,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
             ?.get<Boolean>("updated") == true
 
         if (updated) {
-            snackbarHostState.showSnackbar("User updated successfully")
+            snackbarHostState.showSnackbar("Account info updated successfully!")
             navController.navController
                 .previousBackStackEntry
                 ?.savedStateHandle

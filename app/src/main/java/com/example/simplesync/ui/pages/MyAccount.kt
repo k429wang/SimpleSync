@@ -49,6 +49,7 @@ fun UserDetails(
     val coroutineScope = rememberCoroutineScope()
 
     currUser?.let { user ->
+        val authUser = user.authUser
         val metadata = user.userMetadata
 
         val firstName = remember { mutableStateOf(metadata.firstName) }
@@ -61,9 +62,10 @@ fun UserDetails(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Email: ${user.authUser.email}")
-        Text("Created At: ${user.authUser.createdAt}")
-        Text("Last Sign-In: ${user.authUser.lastSignInAt}")
+        Text("User ID: ${authUser.id}")
+        Text("Email: ${authUser.email}")
+        Text("Created At: ${authUser.createdAt}")
+        Text("Last Sign In: ${authUser.lastSignInAt}")
 
         Button(
             onClick = {
