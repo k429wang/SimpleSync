@@ -1,16 +1,17 @@
-| Date       | Emily   | Erin | Freeman |   Kai   | Keegan | Sarah | TASK
-| ---------- | ------- | ---- | ------- | ------- | ------ | ----- | -----
-| 2025/05/26 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Setup Github repo (timelog, readme, and sent invites)
-| 2025/05/29 | 3 hours | ---- | ------- | ------- | ------ | ----- | Built Basic Navigation Chassis
-| 2025/06/07 | ------- | ---- | ------- | ------- | 1 hour | ----- | -----
-| 2025/06/08 | 4 hours | ---- | ------- | ------- | ------ | ----- | Built Basic Scaffold
-| 2025/06/15 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Helped Keegan w/ Supabase setup + ER diagrams
-| 2025/06/16 | ------- | ---- | ------- | 3 hours | ------ | ----- | Reviewed/tested User Profile UI PR + integrated w/ backend DB
-| 2025/06/22 | 8 hours | ---- | ------- | ------- | ------ | ----- | Began work on Calendar
-| 2025/07/03 | 6 hours | ---- | ------- | ------- | ------ | ----- | Finished Calendar Component
-| 2025/07/06 | ------- | ---- | ------- | 3 hours | ------ | ----- | Integrated Friends UI w/ backend DB
-| 2025/07/07 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Looked into Event Details policy issue
-| 2025/07/08 | 3 hours | ---- | ------- | ------- | ------ | ----- | Incorporated Calendar with backend
-| 2025/07/09 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested My Event + Event Details PRs
-| 2025/07/14 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested profile pictures PR
-| 2025/07/14 | ------- | ---- | ------- | 3 hours | ------ | ----- | Allow users to edit personal account information
+| Date       | Emily   | Erin | Freeman |   Kai   | Keegan  | Sarah | TASK
+| ---------- | ------- | ---- | ------- | ------- | ------  | ----- | -----
+| 2025/05/26 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Setup Github repo (timelog, readme, and sent invites)
+| 2025/05/29 | 3 hours | ---- | ------- | ------- | ------  | ----- | Built Basic Navigation Chassis
+| 2025/06/07 | ------- | ---- | ------- | ------- | 1 hour  | ----- | -----
+| 2025/06/08 | 4 hours | ---- | ------- | ------- | ------  | ----- | Built Basic Scaffold
+| 2025/06/15 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Helped Keegan w/ Supabase setup + ER diagrams
+| 2025/06/16 | ------- | ---- | ------- | 3 hours | ------  | ----- | Reviewed/tested User Profile UI PR + integrated w/ backend DB
+| 2025/06/22 | 8 hours | ---- | ------- | ------- | ------  | ----- | Began work on Calendar
+| 2025/07/03 | 6 hours | ---- | ------- | ------- | ------  | ----- | Finished Calendar Component
+| 2025/07/06 | ------- | ---- | ------- | 3 hours | ------  | ----- | Integrated Friends UI w/ backend DB
+| 2025/07/07 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Looked into Event Details policy issue
+| 2025/07/08 | 3 hours | ---- | ------- | ------- | ------  | ----- | Incorporated Calendar with backend
+| 2025/07/09 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested My Event + Event Details PRs
+| 2025/07/14 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested profile pictures PR
+| 2025/07/14 | ------- | ---- | ------- | 3 hours | ------  | ----- | Allow users to edit personal account information
+| 2025/07/14 | ------- | ---- | ------- | ------- | 4 hour  | ----- | Implement Adding friends, bunch of reworking
