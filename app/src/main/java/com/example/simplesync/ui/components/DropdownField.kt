@@ -10,7 +10,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun DropdownField(label: String, options: List<String>, selectedOption: MutableState<String>) {
+fun DropdownField(
+    label: String,
+    options: List<String>,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -30,7 +35,7 @@ fun DropdownField(label: String, options: List<String>, selectedOption: MutableS
 
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                value = selectedOption.value,
+                value = value,
                 onValueChange = {},
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -52,7 +57,7 @@ fun DropdownField(label: String, options: List<String>, selectedOption: MutableS
                     DropdownMenuItem(
                         text = { Text(option) },
                         onClick = {
-                            selectedOption.value = option
+                            onValueChange(option)
                             expanded = false
                         }
                     )

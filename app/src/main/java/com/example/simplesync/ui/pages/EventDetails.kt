@@ -26,7 +26,7 @@ import com.example.simplesync.viewmodel.UserViewModel
 fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     val userViewModel: UserViewModel = hiltViewModel()
     var metadata by remember { mutableStateOf<UserMetadata?>(null) }
-    var noteText = remember { mutableStateOf("") }
+    var noteText by remember { mutableStateOf("") }
 
     LaunchedEffect(event.owner) {
         userViewModel.fetchUserMetadataById(event.owner) {
@@ -116,7 +116,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
 //                label = { Text("Note") },
 //                modifier = Modifier.fillMaxWidth()
 //            )
-            EventField("Note:", noteText) // TODO: formatting is weird
+            EventField("Note:", noteText, {noteText = it}) // TODO: formatting is weird
 
             Spacer(Modifier.height(16.dp))
 

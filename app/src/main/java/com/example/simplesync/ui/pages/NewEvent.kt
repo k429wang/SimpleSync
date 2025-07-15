@@ -40,14 +40,14 @@ fun NewEventPage(
 
     // Event parameters sent to backend
     val currUser by userViewModel.currUser.collectAsState()
-    val name = remember { mutableStateOf("") }
-    val description = remember { mutableStateOf("") }
-    val startTime = remember { mutableStateOf<Instant?>(null) }
-    val endTime = remember { mutableStateOf<Instant?>(null) }
-    val type = remember { mutableStateOf("") }
-    val location = remember { mutableStateOf("") }
-    val recurrence = remember { mutableStateOf("") }
-    val visibility = remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var startTime by remember { mutableStateOf<Instant?>(null) }
+    var endTime by remember { mutableStateOf<Instant?>(null) }
+    var type by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var recurrence by remember { mutableStateOf("") }
+    var visibility by remember { mutableStateOf("") }
 
     // Keep track of scroll position
     val scrollState = rememberScrollState()
@@ -132,20 +132,35 @@ fun NewEventPage(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Fields that will be synced with the backend
-            EventField("Name:", name)
-            EventField("Description:", description)
+            EventField("Name:", name, {name = it})
+            EventField("Description:", description, {description = it})
 
-            DateTimePickerField("Start Time", startTime.value) {
-                startTime.value = it
+            DateTimePickerField("Start Time", startTime) {
+                startTime = it
             }
-            DateTimePickerField("End Time", endTime.value) {
-                endTime.value = it
+            DateTimePickerField("End Time", endTime) {
+                endTime = it
             }
 
-            DropdownField("Type:", typeOptions, type)
-            EventField("Location:", location)
-            DropdownField("Recurrence:", recurrenceOptions, recurrence)
-            DropdownField("Visibility:", visibilityOptions, visibility)
+            DropdownField(
+                label = "Type:",
+                options = typeOptions,
+                value = type,
+                onValueChange = {type = it}
+            )
+            EventField("Location:", location, {location = it})
+            DropdownField(
+                label = "Recurrence:",
+                options = recurrenceOptions,
+                value = recurrence,
+                onValueChange = {recurrence = it}
+            )
+            DropdownField(
+                label = "Visibility:",
+                options = visibilityOptions,
+                value = visibility,
+                onValueChange = {visibility = it}
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -156,14 +171,14 @@ fun NewEventPage(
                         handleCreateNewEvent(
                             eventViewModel,
                             currUser?.authUser?.id,
-                            name.value,
-                            description.value,
-                            startTime.value,
-                            endTime.value,
-                            type.value,
-                            location.value,
-                            recurrence.value,
-                            visibility.value,
+                            name,
+                            description,
+                            startTime,
+                            endTime,
+                            type,
+                            location,
+                            recurrence,
+                            visibility,
                         )
                     } catch (e: Exception) {
                         coroutineScope.launch {

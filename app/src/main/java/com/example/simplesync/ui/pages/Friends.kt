@@ -1,10 +1,11 @@
 package com.example.simplesync.ui.pages
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,11 +18,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.ui.components.ScreenTitle
-import com.example.simplesync.model.Friend
+import com.example.simplesync.model.Friendship
+import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
+import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendsViewModel
 import com.example.simplesync.viewmodel.UserViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun FriendsPage(
@@ -29,12 +34,21 @@ fun FriendsPage(
     viewModel: FriendsViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel()
 ) {
+    // Overall page states
     var searchQuery by remember { mutableStateOf("") }
-    val friends by viewModel.friends.collectAsState()
-    val currUser by userViewModel.currUser.collectAsState()
+    val friendships by viewModel.friendships.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    // Current User states
+    val currUser by userViewModel.currUser.collectAsState()
     val userId = currUser?.authUser?.id
     var loginError by remember { mutableStateOf(false) }
+
+    // AddFriend states
+    var showAddFriendDialog by remember { mutableStateOf(false) }
+    var friendUsername by remember { mutableStateOf("") }
+    var addFriendError by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(currUser) {
         if (currUser == null) {
@@ -43,7 +57,7 @@ fun FriendsPage(
         }
 
         if (userId != null) {
-            viewModel.fetchFriendsForUser(userId)
+            viewModel.fetchFriendshipsForUser(userId)
             loginError = false // Reset error in case of recomposition
         } else {
             loginError = true
@@ -51,7 +65,8 @@ fun FriendsPage(
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController) }
+        bottomBar = { BottomNavBar(navController) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -59,8 +74,103 @@ fun FriendsPage(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // Title
-            ScreenTitle("Friends")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Title
+                ScreenTitle("Friends")
+
+                // "Add Friend" button
+                FloatingActionButton(
+                    onClick = { showAddFriendDialog = true },
+                    modifier = Modifier.padding(4.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(imageVector = Icons.Default.PersonAdd, contentDescription = "Add Friend")
+                }
+            }
+
+
+            // "Add Friend" dialog popup
+            if (showAddFriendDialog) {
+                AlertDialog(
+                    onDismissRequest = { showAddFriendDialog = false },
+                    title = { Text("Add Friend") },
+                    text = {
+                        Column {
+                            EventField(label="Friend Username:", value=friendUsername, onValueChange={friendUsername = it})
+                            if (addFriendError.isNotEmpty()) {
+                                Text(
+                                    addFriendError,
+                                    color = Color.Red,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            if (friendUsername.isBlank()) {
+                                addFriendError = "Username cannot be empty"
+                            } else if (userId == null) {
+                                addFriendError = "User ID is null"
+                            } else {
+                                coroutineScope.launch {
+                                    val friend = userViewModel.getUserByUsername(friendUsername)
+                                    if (friend == null) {
+                                        addFriendError = "User not found!"
+                                    } else if (friend.id == userId) {
+                                        addFriendError = "You may not add yourself"
+                                    } else {
+                                        // Friend exists, and not adding themselves
+                                        val existsAlready = friendships.any {
+                                            (it.userId == userId && it.friendId == friend.id) ||
+                                                    (it.userId == friend.id && it.friendId == userId)
+                                        }
+
+                                        if (existsAlready) {
+                                            addFriendError = "Friendship already exists or is pending."
+                                        } else {
+                                            // Valid friendship that doesn't exist yet
+                                            val result = viewModel.createFriendship(
+                                                Friendship(
+                                                    userId = userId,
+                                                    friendId = friend.id,
+                                                    status = Status.PENDING,
+                                                )
+                                            )
+
+                                            // Display message for results
+                                            if (result.isSuccess) {
+                                                snackbarHostState.showSnackbar("Friend request sent to @${friend.username}")
+                                                showAddFriendDialog = false
+                                                friendUsername = ""
+                                                addFriendError = ""
+                                            } else {
+                                                val message = result.exceptionOrNull()?.message ?: "Unknown error"
+                                                snackbarHostState.showSnackbar("Failed to send request: $message")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }) {
+                            Text("Send Friend Request")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showAddFriendDialog = false
+                            friendUsername = ""
+                            addFriendError = ""
+                        }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
 
             // Search Bar
             SearchBar(searchQuery = searchQuery, onQueryChange = { searchQuery = it })
@@ -74,12 +184,12 @@ fun FriendsPage(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (loginError) {
                 Text(
-                    text = "You must be logged in to view your friends. d${userId}d",
+                    text = "You must be logged in to view your friends.",
                     color = Color.Red,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 16.dp)
                 )
-            } else if (friends.isEmpty()){
+            } else if (friendships.isEmpty()){
                 Text(
                     text = "No friends found.",
                     color = Color.Gray,
@@ -88,35 +198,44 @@ fun FriendsPage(
                 )
             } else {
                 // Generate friends List
-                val userCache = remember { mutableStateMapOf<String, UserMetadata?>() }
+                val friendsCache = remember { mutableStateMapOf<String, UserMetadata?>() }
 
                 LazyColumn {
-                    items(friends) { friend ->
-                        val user = userCache[friend.friendId]
+                    items(friendships) { friendship ->
+                        var friend = friendsCache[friendship.friendId]
 
-                        if (!userCache.containsKey(friend.friendId)) {
-                            LaunchedEffect(friend.friendId) {
-                                val fetched = userViewModel.getUserById(friend.friendId)
-                                userCache[friend.friendId] = fetched
+                        if (!friendsCache.containsKey(friendship.friendId)) {
+                            // Retrieve the friend
+                            LaunchedEffect(friendship.friendId) {
+                                val fetched = userViewModel.getUserById(friendship.friendId)
+                                friendsCache[friendship.friendId] = fetched
+                                friend = fetched
                             }
                         }
 
-                        FriendListItem(
-                            friend = friend,
-                            fullname = user?.let { "${it.firstName} ${it.lastName}" } ?: "Unknown",
-                            username = user?.username ?: "Unknown"
-                        )
+                        if (friend != null) {
+                            // Render the list item for the friend
+                            FriendListItem(
+                                fullName = friend?.let { "${it.firstName} ${it.lastName}" } ?: "Unknown",
+                                username = friend?.username ?: "Unknown",
+                                status = friendship.status,
+                            )
+                        }
                     }
                 }
             }
             }
-
         }
     }
 
 @Composable
-fun FriendListItem(friend: Friend, fullname: String, username: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+fun FriendListItem(fullName: String, username: String, status: Status) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Icon(
             imageVector = Icons.Default.Person,
             contentDescription = "Profile",
@@ -124,10 +243,20 @@ fun FriendListItem(friend: Friend, fullname: String, username: String) {
                 .size(48.dp)
                 .padding(end = 12.dp)
         )
-        // TODO: update UI to support display of different friend statuses ("ACCEPTED", "PENDING", "BLOCKED")
-        Column {
-            Text(text = fullname, fontWeight = FontWeight.Bold)
-            Text(text = username, fontSize = 12.sp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = fullName, fontWeight = FontWeight.Bold)
+            Text(text = "@$username", fontSize = 12.sp, color = Color.Gray)
         }
+        Text(
+            text = status.name, // Will show "PENDING", "ACCEPTED", etc.
+            fontSize = 12.sp,
+            color = when (status) {
+                Status.ACCEPTED -> Color(0xFF4CAF50)
+                Status.PENDING -> Color(0xFFFFC107)
+                Status.DECLINED -> Color(0xFFF44336)
+            },
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
 }
+
