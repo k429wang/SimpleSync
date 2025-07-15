@@ -29,6 +29,21 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
     val username = currUser?.userMetadata?.username
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        val updated = navController.navController
+            .previousBackStackEntry
+            ?.savedStateHandle
+            ?.get<Boolean>("updated") == true
+
+        if (updated) {
+            snackbarHostState.showSnackbar("User updated successfully")
+            navController.navController
+                .previousBackStackEntry
+                ?.savedStateHandle
+                ?.remove<Boolean>("updated")
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {

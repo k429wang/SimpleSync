@@ -1,41 +1,40 @@
 package com.example.simplesync.ui.pages
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.EventField
+import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.UserViewModel
-import com.example.simplesync.ui.components.ProfilePicture
-
+import kotlinx.coroutines.launch
 
 @Composable
 fun MyAccountPage(navController: SimpleSyncNavController) {
     val viewModel: UserViewModel = hiltViewModel()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold (
+    Scaffold(
+        bottomBar = { BottomNavBar(navController) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
-            modifier = Modifier.padding(padding)
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("User Profile Page", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            UserDetails(viewModel, snackbarHostState)
+            ScreenTitle("My Account")
+            UserDetails(viewModel, snackbarHostState, navController)
         }
     }
 }
@@ -43,27 +42,60 @@ fun MyAccountPage(navController: SimpleSyncNavController) {
 @Composable
 fun UserDetails(
     viewModel: UserViewModel = hiltViewModel(),
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    navController: SimpleSyncNavController
 ) {
     val currUser by viewModel.currUser.collectAsState()
-
-    Text("My Account:")
-
-    ProfilePicture(viewModel, snackbarHostState)
+    val coroutineScope = rememberCoroutineScope()
 
     currUser?.let { user ->
-        val authUser = user.authUser
         val metadata = user.userMetadata
 
-        Text(
-            text = buildString {
-                appendLine("User ID: ${authUser.id}")
-                appendLine("Name: ${metadata.firstName} ${metadata.lastName}")
-                appendLine("Email: ${authUser.email}")
-                appendLine("Created At: ${authUser.createdAt}")
-                appendLine("Last Sign In: ${authUser.lastSignInAt}")
+        val firstName = remember { mutableStateOf(metadata.firstName) }
+        val lastName = remember { mutableStateOf(metadata.lastName) }
+        val username = remember { mutableStateOf(metadata.username) }
+
+        EventField("Username:", username)
+        EventField("First Name:", firstName)
+        EventField("Last Name:", lastName)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Email: ${user.authUser.email}")
+        Text("Created At: ${user.authUser.createdAt}")
+        Text("Last Sign-In: ${user.authUser.lastSignInAt}")
+
+        Button(
+            onClick = {
+                viewModel.updateUserMetadata(
+                    firstName = firstName.value,
+                    lastName = lastName.value,
+                    username = username.value
+                ) { success ->
+                    coroutineScope.launch {
+                        if (success) {
+                            snackbarHostState.showSnackbar("Updating...")
+                            navController.navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("updated", true)
+                            navController.nav(navController.PROFILE)
+                        } else {
+                            snackbarHostState.showSnackbar("Failed to update user")
+                        }
+                    }
+                }
             },
-            modifier = Modifier.padding(top = 8.dp)
-        )
-    } ?: Text("Loading user info...")
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Save Changes", color = MaterialTheme.colorScheme.onPrimary)
+        }
+    } ?: Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
 }
