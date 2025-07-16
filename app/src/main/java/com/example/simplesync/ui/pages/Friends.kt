@@ -23,6 +23,7 @@ import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.ui.components.AcceptAndDeclineButtons
 import com.example.simplesync.ui.components.EventField
+import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendshipViewModel
 import com.example.simplesync.viewmodel.UserViewModel
@@ -350,6 +351,7 @@ fun FriendshipListSection(
                 username = friend.username,
                 status = friendship.status,
                 isIncoming = friendship.status == Status.PENDING && friendship.friendId == userId,
+                pfpUrl = friend.profilePicURL ?: "",
                 onAccept = {
                     coroutineScope.launch {
                         val updatedFriendship = friendship.copy(status = Status.ACCEPTED)
@@ -384,6 +386,7 @@ fun FriendListItem(
     fullName: String,
     username: String,
     status: Status,
+    pfpUrl: String,
     isIncoming: Boolean, // If the friend request is incoming
     onAccept: (() -> Unit)? = null, // For accept/decline buttons
     onDecline: (() -> Unit)? = null
@@ -394,18 +397,32 @@ fun FriendListItem(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // User Icon and Username
-        Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "Profile",
+        // User Icon
+        if (pfpUrl != "") {
+            ReadOnlyProfilePicture(
+                imageUrl = pfpUrl,
+                size = 48.dp,
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Profile",
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(end = 12.dp)
+            )
+        }
+
+        // Name + Username
+        Column(
             modifier = Modifier
-                .size(48.dp)
-                .padding(end = 12.dp)
-        )
-        Column(modifier = Modifier.weight(1f)) {
+                .weight(1f)
+                .padding(start = 6.dp)
+        ) {
             Text(text = fullName, fontWeight = FontWeight.Bold)
             Text(text = "@$username", fontSize = 12.sp, color = Color.Gray)
         }
+
 
         // Request Status
         Text(
