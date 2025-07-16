@@ -416,7 +416,7 @@ fun FriendListItem(
                 Status.PENDING -> Color(0xFFFFC107)
                 Status.DECLINED -> Color(0xFFF44336)
             },
-            modifier = Modifier.padding(start = 8.dp)
+            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
         )
 
         // Buttons to Accept/Decline incoming requests
