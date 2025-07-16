@@ -26,7 +26,11 @@ import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendsViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.lazy.items
+
+// Constants for tabs
+const val EXISTING = 0
+const val PENDING = 1
+const val DECLINED = 2
 
 @Composable
 fun FriendsPage(
@@ -51,7 +55,7 @@ fun FriendsPage(
     val coroutineScope = rememberCoroutineScope()
 
     // Tabs
-    val tabTitles = listOf<String>("Friends", "Incoming", "Rejected")
+    val tabTitles = listOf<String>("Friends", "Pending", "Declined")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(currUser) {
@@ -103,7 +107,10 @@ fun FriendsPage(
                     title = { Text("Add Friend") },
                     text = {
                         Column {
-                            EventField(label="Friend Username:", value=friendUsername, onValueChange={friendUsername = it})
+                            EventField(
+                                label = "Friend Username:",
+                                value = friendUsername,
+                                onValueChange = { friendUsername = it })
                             if (addFriendError.isNotEmpty()) {
                                 Text(
                                     addFriendError,
@@ -135,7 +142,8 @@ fun FriendsPage(
                                         }
 
                                         if (existsAlready) {
-                                            addFriendError = "Friendship already exists or is pending."
+                                            addFriendError =
+                                                "Friendship already exists or is pending."
                                         } else {
                                             // Valid friendship that doesn't exist yet
                                             val result = viewModel.createFriendship(
@@ -153,7 +161,8 @@ fun FriendsPage(
                                                 friendUsername = ""
                                                 addFriendError = ""
                                             } else {
-                                                val message = result.exceptionOrNull()?.message ?: "Unknown error"
+                                                val message = result.exceptionOrNull()?.message
+                                                    ?: "Unknown error"
                                                 snackbarHostState.showSnackbar("Failed to send request: $message")
                                             }
                                         }
@@ -193,7 +202,7 @@ fun FriendsPage(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 16.dp)
                 )
-            } else if (friendships.isEmpty()){
+            } else if (friendships.isEmpty()) {
                 Text(
                     text = "No friends found.",
                     color = Color.Gray,
@@ -217,41 +226,102 @@ fun FriendsPage(
 
                 // Display friendships according to the selected tab
                 val friendsCache = remember { mutableStateMapOf<String, UserMetadata?>() }
-                val filteredFriendships = when (selectedTabIndex) {
-                    0 -> friendships.filter { it.status == Status.ACCEPTED } // Existing friendships
-                    1 -> friendships.filter { it.status == Status.PENDING }  // Pending friend requests (sent & received)
-                    2 -> friendships.filter { it.status == Status.DECLINED } // Denied friend requests (sent & received)
-                    else -> friendships
-                }
-
                 LazyColumn {
-                    items(filteredFriendships) { friendship ->
-                        var friendId = friendship.friendId
-                        var friend = friendsCache[friendId] // Check if friend is already in the cache
-
-                        if (!friendsCache.containsKey(friendId)) {
-                            // Retrieve the friend if not already cached
-                            LaunchedEffect(friendId) {
-                                val fetched = userViewModel.getUserById(friendId)
-                                friendsCache[friendId] = fetched // Cache it
-                                friend = fetched // Use it
+                    item {
+                        when (selectedTabIndex) {
+                            EXISTING -> { // Existing Friendships
+                                FriendshipListSection(
+                                    friendships = friendships.filter { it.status == Status.ACCEPTED },
+                                    userId = userId ?: "",
+                                    userViewModel = userViewModel,
+                                    friendsCache = friendsCache
+                                )
                             }
-                        }
 
-                        if (friend != null) {
-                            // Render the list item for the friend
-                            FriendListItem(
-                                fullName = friend?.let { "${it.firstName} ${it.lastName}" } ?: "Unknown",
-                                username = friend?.username ?: "Unknown",
-                                status = friendship.status,
-                            )
+                            PENDING -> { // Pending Friendships
+                                // Incoming Friend Requests
+                                FriendshipListSection(
+                                    friendships = friendships.filter { it.status == Status.PENDING && it.friendId == userId },
+                                    userId = userId ?: "",
+                                    userViewModel = userViewModel,
+                                    friendsCache = friendsCache,
+                                    sectionTitle = "Incoming Requests"
+                                )
+                                // Outgoing Friend Requests
+                                FriendshipListSection(
+                                    friendships = friendships.filter { it.status == Status.PENDING && it.userId == userId },
+                                    userId = userId ?: "",
+                                    userViewModel = userViewModel,
+                                    friendsCache = friendsCache,
+                                    sectionTitle = "Outgoing Requests"
+                                )
+                            }
+
+                            DECLINED -> { // Declined Friendships
+                                // Incoming Friend Requests that were Declined
+                                FriendshipListSection(
+                                    friendships = friendships.filter { it.status == Status.DECLINED && it.friendId == userId },
+                                    userId = userId ?: "",
+                                    userViewModel = userViewModel,
+                                    friendsCache = friendsCache,
+                                    sectionTitle = "Incoming Requests You Declined"
+                                )
+                                // Outgoing Friend Requests that were Declined
+                                FriendshipListSection(
+                                    friendships = friendships.filter { it.status == Status.DECLINED && it.userId == userId },
+                                    userId = userId ?: "",
+                                    userViewModel = userViewModel,
+                                    friendsCache = friendsCache,
+                                    sectionTitle = "Your Outgoing Requests That Were Declined"
+                                )
+                            }
                         }
                     }
                 }
             }
-            }
         }
     }
+}
+
+@Composable
+fun FriendshipListSection(
+    friendships: List<Friendship>,
+    userId: String,
+    userViewModel: UserViewModel,
+    friendsCache: MutableMap<String, UserMetadata?>,
+    sectionTitle: String? = null
+) {
+    if (friendships.isEmpty()) return
+
+    sectionTitle?.let {
+        Text(
+            text = it,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+    }
+
+    friendships.forEach { friendship ->
+        val otherUserId = if (friendship.userId == userId) friendship.friendId else friendship.userId
+        val friend = friendsCache[otherUserId]
+
+        if (!friendsCache.containsKey(otherUserId)) {
+            LaunchedEffect(otherUserId) {
+                val fetched = userViewModel.getUserById(otherUserId)
+                friendsCache[otherUserId] = fetched
+            }
+        }
+
+        if (friend != null) {
+            FriendListItem(
+                fullName = "${friend.firstName} ${friend.lastName}",
+                username = friend.username,
+                status = friendship.status
+            )
+        }
+    }
+}
 
 @Composable
 fun FriendListItem(fullName: String, username: String, status: Status) {

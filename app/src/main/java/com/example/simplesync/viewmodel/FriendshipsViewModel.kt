@@ -28,7 +28,10 @@ class FriendsViewModel @Inject constructor(
         return try {
             val fetched = supabase.from("friendships").select {
                 filter {
-                    eq("user_id", userId)
+                    or {
+                        eq("user_id", userId) // User initiated
+                        eq("friend_id", userId) // Other user initiated
+                    }
                 }
             }.decodeList<Friendship>()
             _friendships.value = fetched
