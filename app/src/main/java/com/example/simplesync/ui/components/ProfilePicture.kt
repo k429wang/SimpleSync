@@ -35,11 +35,81 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 
 @Composable
-fun ProfilePicture(
+private fun BaseProfilePicture(
+    imageUrl: String?,
+    size: Dp,
+    showEditIcon: Boolean,
+    onEditClick: (() -> Unit)? = null
+) {
+    val hasProfilePic = !imageUrl.isNullOrBlank() && imageUrl != "null"
+    val context = LocalContext.current
+
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .then(if (onEditClick != null) Modifier.clickable { onEditClick() } else Modifier)
+    ) {
+        if (hasProfilePic) {
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data("$imageUrl?t=${System.currentTimeMillis()}")
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Profile Picture",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Gray.copy(alpha = 0.2f), CircleShape)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Default Profile",
+                    tint = Color.DarkGray,
+                    modifier = Modifier.size(size * 0.375f)
+                )
+            }
+        }
+
+        if (showEditIcon && onEditClick != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = -size * 0.15f, y = -size * 0.125f)
+                    .size(size * 0.175f)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    .clickable { onEditClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit Profile Picture",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(size * 0.09f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EditableProfilePicture(
     viewModel: UserViewModel,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    size: Dp = 128.dp
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -58,7 +128,7 @@ fun ProfilePicture(
                     val success = viewModel.uploadProfilePicture(it)
                     if (success) {
                         snackbarHostState.showSnackbar("Profile picture updated")
-                        viewModel.fetchCurrentUser() // Refresh from Supabase
+                        viewModel.fetchCurrentUser()
                     } else {
                         snackbarHostState.showSnackbar("Failed to upload picture")
                     }
@@ -67,69 +137,27 @@ fun ProfilePicture(
         }
     }
 
-    val imageUrl = currUser?.userMetadata?.profilePicURL?.let {
-        // Add cache busting suffix to make the URL appear new to Coil
-        // everytime currUser updates (which it does in uploadProfilePicture)
-        if (it.isNotBlank()) "$it?t=${System.currentTimeMillis()}" else null
-    }
+    val imageUrl = currUser?.userMetadata?.profilePicURL
 
-    val hasProfilePic = !imageUrl.isNullOrBlank() && imageUrl != "null"
-
-    Box (
-        modifier = Modifier
-            .size(128.dp)
-            .clip(CircleShape)
-            .clickable { imagePickerLauncher.launch("image/*") }
-    ) {
-        if (hasProfilePic) {
-            // Display the user's stored profile picture
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Profile Picture",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-            )
-        } else {
-            // Display the default profile picture
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Gray.copy(alpha = 0.2f), CircleShape)
-                    .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Default Profile",
-                    tint = Color.DarkGray,
-                    modifier = Modifier.size(48.dp)
-                )
-            }
-        }
-
-        // Edit Icon Button overlay (top-right corner)
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset(x = (-20).dp, y = (-16).dp)
-                .size(22.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                .clickable { imagePickerLauncher.launch("image/*") },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit Profile Picture",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(12.dp)
-            )
-        }
-    }
+    BaseProfilePicture(
+        imageUrl = imageUrl,
+        size = size,
+        showEditIcon = true,
+        onEditClick = { imagePickerLauncher.launch("image/*") }
+    )
 }
+
+@Composable
+fun ReadOnlyProfilePicture(
+    imageUrl: String?,
+    size: Dp = 128.dp
+) {
+    BaseProfilePicture(
+        imageUrl = imageUrl,
+        size = size,
+        showEditIcon = false,
+        onEditClick = null
+    )
+}
+
+

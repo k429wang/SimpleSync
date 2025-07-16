@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.EditableProfilePicture
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -34,6 +35,11 @@ fun MyAccountPage(navController: SimpleSyncNavController) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ScreenTitle("My Account")
+            EditableProfilePicture(
+                viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
+                size = 96.dp
+            )
             UserDetails(viewModel, snackbarHostState, navController)
         }
     }
