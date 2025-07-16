@@ -340,8 +340,8 @@ fun FriendshipListSection(
                 isIncoming = friendship.status == Status.PENDING && friendship.friendId == userId,
                 onAccept = {
                     coroutineScope.launch {
-                        friendship.status = Status.ACCEPTED
-                        val result = friendshipViewModel.updateFriendship(friendship)
+                        val updatedFriendship = friendship.copy(status = Status.ACCEPTED)
+                        val result = friendshipViewModel.updateFriendship(updatedFriendship, userId)
                         if (result.isSuccess) {
                             if (result.isSuccess) {
                                 snackbarHostState.showSnackbar("Friend request accepted")
@@ -353,8 +353,8 @@ fun FriendshipListSection(
                 },
                 onDecline = {
                     coroutineScope.launch {
-                        friendship.status = Status.DECLINED
-                        val result = friendshipViewModel.updateFriendship(friendship)
+                        val updatedFriendship = friendship.copy(status = Status.DECLINED)
+                        val result = friendshipViewModel.updateFriendship(updatedFriendship, userId)
                         if (result.isSuccess) {
                             snackbarHostState.showSnackbar("Friend request declined")
                         } else {

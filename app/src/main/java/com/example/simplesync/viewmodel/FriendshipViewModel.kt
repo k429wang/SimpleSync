@@ -26,7 +26,7 @@ class FriendshipViewModel @Inject constructor(
     suspend fun fetchFriendshipsForUser(userId: String): Result<Boolean> {
         _isLoading.value = true
         return try {
-            val fetched = supabase.from("friendships").select {
+            val fetched = supabase.from(FRIENDS_TABLE).select {
                 filter {
                     or {
                         eq("user_id", userId) // User initiated
@@ -34,6 +34,7 @@ class FriendshipViewModel @Inject constructor(
                     }
                 }
             }.decodeList<Friendship>()
+
             _friendships.value = fetched
             Result.success(true)
         } catch (e: Exception) {
@@ -54,8 +55,8 @@ class FriendshipViewModel @Inject constructor(
             }
     }
 
-    // Update an existing friend (e.g., status change)
-    suspend fun updateFriendship(friendship: Friendship): Result<Boolean> {
+    // Update an existing friendship (e.g., status change)
+    suspend fun updateFriendship(friendship: Friendship, userIdToFetch: String): Result<Boolean> {
         return try {
             supabase.from(FRIENDS_TABLE).update(friendship) {
                 filter {
@@ -63,7 +64,7 @@ class FriendshipViewModel @Inject constructor(
                     eq("friend_id", friendship.friendId)
                 }
             }
-            fetchFriendshipsForUser(friendship.userId)
+            fetchFriendshipsForUser(userIdToFetch)
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
