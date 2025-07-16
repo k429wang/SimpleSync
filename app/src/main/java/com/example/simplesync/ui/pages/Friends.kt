@@ -22,6 +22,7 @@ import com.example.simplesync.model.Friendship
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.ui.components.AcceptAndDeclineButtons
+import com.example.simplesync.ui.components.DeclineButton
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.components.SearchBar
@@ -352,6 +353,17 @@ fun FriendshipListSection(
                 status = friendship.status,
                 isIncoming = friendship.status == Status.PENDING && friendship.friendId == userId,
                 pfpUrl = friend.profilePicURL ?: "",
+                showDeleteButton = friendship.status == Status.ACCEPTED,
+                onDelete = {
+                    coroutineScope.launch {
+                        val result = friendshipViewModel.deleteFriendship(friendship, userId)
+                        if (result.isSuccess) {
+                            snackbarHostState.showSnackbar("Friend removed")
+                        } else {
+                            snackbarHostState.showSnackbar("Failed to remove friend")
+                        }
+                    }
+                },
                 onAccept = {
                     coroutineScope.launch {
                         val updatedFriendship = friendship.copy(status = Status.ACCEPTED)
@@ -389,7 +401,9 @@ fun FriendListItem(
     pfpUrl: String,
     isIncoming: Boolean, // If the friend request is incoming
     onAccept: (() -> Unit)? = null, // For accept/decline buttons
-    onDecline: (() -> Unit)? = null
+    onDecline: (() -> Unit)? = null,
+    showDeleteButton: Boolean = false,
+    onDelete: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -436,9 +450,13 @@ fun FriendListItem(
             modifier = Modifier.padding(start = 8.dp, end = 8.dp)
         )
 
-        // Buttons to Accept/Decline incoming requests
+
         if (isIncoming && onAccept != null && onDecline != null) {
+            // Buttons to Accept/Decline incoming requests (For Pending tab)
             AcceptAndDeclineButtons(onAccept, onDecline)
+        } else if (showDeleteButton && onDelete != null) {
+            // Button to Delete friends (For Friends tab)
+            DeclineButton(onDelete)
         }
     }
 }

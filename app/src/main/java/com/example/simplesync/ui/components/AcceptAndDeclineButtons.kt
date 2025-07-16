@@ -13,31 +13,45 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
+fun AcceptButton(
+    onAccept: () -> Unit,
+) {
+    IconButton(
+        onClick = onAccept,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = "Accept",
+            tint = Color(0xFF4CAF50)
+        )
+    }
+}
+
+@Composable
+fun DeclineButton(
+    onDecline: () -> Unit,
+) {
+    IconButton(
+        onClick = onDecline,
+        modifier = Modifier.size(40.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = "Decline",
+            tint = Color(0xFFF44336)
+        )
+    }
+}
+
+@Composable
 fun AcceptAndDeclineButtons(
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
     Column {
-        IconButton(
-            onClick = onAccept,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Accept",
-                tint = Color(0xFF4CAF50)
-            )
-        }
-        IconButton(
-            onClick = onDecline,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Decline",
-                tint = Color(0xFFF44336)
-            )
-        }
+        AcceptButton(onAccept)
+        DeclineButton(onDecline)
     }
 }
 

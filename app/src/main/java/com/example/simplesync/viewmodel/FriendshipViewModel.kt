@@ -71,16 +71,16 @@ class FriendshipViewModel @Inject constructor(
         }
     }
 
-    // Delete a friend relationship
-    suspend fun deleteFriendship(userId: String, friendId: String): Result<Boolean> {
+    // Delete a friendship
+    suspend fun deleteFriendship(friendship: Friendship, userIdToFetch: String): Result<Boolean> {
         return try {
             supabase.from(FRIENDS_TABLE).delete {
                 filter {
-                    eq("user_id", userId)
-                    eq("friend_id", friendId)
+                    eq("user_id", friendship.userId)
+                    eq("friend_id", friendship.friendId)
                 }
             }
-            fetchFriendshipsForUser(userId)
+            fetchFriendshipsForUser(userIdToFetch)
             Result.success(true)
         } catch (e: Exception) {
             Result.failure(e)
