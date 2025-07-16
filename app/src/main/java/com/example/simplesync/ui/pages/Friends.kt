@@ -50,6 +50,10 @@ fun FriendsPage(
     var addFriendError by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
+    // Tabs
+    val tabTitles = listOf<String>("Friends", "Incoming", "Rejected")
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+
     LaunchedEffect(currUser) {
         if (currUser == null) {
             // Don't do anything yet; wait until it's settled
@@ -197,19 +201,40 @@ fun FriendsPage(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
-                // Generate friends List
+                // Tabs to toggle between different views
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    tabTitles.forEachIndexed { idx, title ->
+                        Tab(
+                            selected = (selectedTabIndex == idx),
+                            onClick = { selectedTabIndex = idx },
+                            text = { Text(title) }
+                        )
+                    }
+                }
+
+                // Display friendships according to the selected tab
                 val friendsCache = remember { mutableStateMapOf<String, UserMetadata?>() }
+                val filteredFriendships = when (selectedTabIndex) {
+                    0 -> friendships.filter { it.status == Status.ACCEPTED } // Existing friendships
+                    1 -> friendships.filter { it.status == Status.PENDING }  // Pending friend requests (sent & received)
+                    2 -> friendships.filter { it.status == Status.DECLINED } // Denied friend requests (sent & received)
+                    else -> friendships
+                }
 
                 LazyColumn {
-                    items(friendships) { friendship ->
-                        var friend = friendsCache[friendship.friendId]
+                    items(filteredFriendships) { friendship ->
+                        var friendId = friendship.friendId
+                        var friend = friendsCache[friendId] // Check if friend is already in the cache
 
-                        if (!friendsCache.containsKey(friendship.friendId)) {
-                            // Retrieve the friend
-                            LaunchedEffect(friendship.friendId) {
-                                val fetched = userViewModel.getUserById(friendship.friendId)
-                                friendsCache[friendship.friendId] = fetched
-                                friend = fetched
+                        if (!friendsCache.containsKey(friendId)) {
+                            // Retrieve the friend if not already cached
+                            LaunchedEffect(friendId) {
+                                val fetched = userViewModel.getUserById(friendId)
+                                friendsCache[friendId] = fetched // Cache it
+                                friend = fetched // Use it
                             }
                         }
 
