@@ -21,6 +21,7 @@ import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.model.Friendship
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
+import com.example.simplesync.ui.components.AcceptAndDeclineButtons
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendshipViewModel
@@ -410,21 +411,6 @@ fun FriendListItem(
         // Buttons to Accept/Decline incoming requests
         if (isIncoming && onAccept != null && onDecline != null) {
             AcceptAndDeclineButtons(onAccept, onDecline)
-        }
-    }
-}
-
-@Composable
-fun AcceptAndDeclineButtons(
-    onAccept: (() -> Unit), // For accept/decline buttons
-    onDecline: (() -> Unit)
-) {
-    Column {
-        TextButton(onClick = onAccept) {
-            Text("Accept", color = Color(0xFF4CAF50))
-        }
-        TextButton(onClick = onDecline) {
-            Text("Decline", color = Color(0xFFF44336))
         }
     }
 }
