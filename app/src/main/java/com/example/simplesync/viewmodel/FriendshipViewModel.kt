@@ -12,7 +12,7 @@ import javax.inject.Inject
 const val FRIENDS_TABLE = "friendships"
 
 @HiltViewModel
-class FriendsViewModel @Inject constructor(
+class FriendshipViewModel @Inject constructor(
     private val supabase: SupabaseClient
 ) : ViewModel() {
 

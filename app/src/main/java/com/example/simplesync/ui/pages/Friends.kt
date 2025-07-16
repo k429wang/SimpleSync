@@ -23,8 +23,9 @@ import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.SearchBar
-import com.example.simplesync.viewmodel.FriendsViewModel
+import com.example.simplesync.viewmodel.FriendshipViewModel
 import com.example.simplesync.viewmodel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 // Constants for tabs
@@ -35,7 +36,7 @@ const val DECLINED = 2
 @Composable
 fun FriendsPage(
     navController: SimpleSyncNavController,
-    viewModel: FriendsViewModel = hiltViewModel(),
+    viewModel: FriendshipViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel()
 ) {
     // Overall page states
@@ -234,7 +235,10 @@ fun FriendsPage(
                                     friendships = friendships.filter { it.status == Status.ACCEPTED },
                                     userId = userId ?: "",
                                     userViewModel = userViewModel,
-                                    friendsCache = friendsCache
+                                    friendshipViewModel = viewModel,
+                                    friendsCache = friendsCache,
+                                    coroutineScope = coroutineScope,
+                                    snackbarHostState = snackbarHostState,
                                 )
                             }
 
@@ -244,16 +248,22 @@ fun FriendsPage(
                                     friendships = friendships.filter { it.status == Status.PENDING && it.friendId == userId },
                                     userId = userId ?: "",
                                     userViewModel = userViewModel,
+                                    friendshipViewModel = viewModel,
                                     friendsCache = friendsCache,
-                                    sectionTitle = "Incoming Requests"
+                                    sectionTitle = "Incoming Requests",
+                                    coroutineScope = coroutineScope,
+                                    snackbarHostState = snackbarHostState,
                                 )
                                 // Outgoing Friend Requests
                                 FriendshipListSection(
                                     friendships = friendships.filter { it.status == Status.PENDING && it.userId == userId },
                                     userId = userId ?: "",
                                     userViewModel = userViewModel,
+                                    friendshipViewModel = viewModel,
                                     friendsCache = friendsCache,
-                                    sectionTitle = "Outgoing Requests"
+                                    sectionTitle = "Outgoing Requests",
+                                    coroutineScope = coroutineScope,
+                                    snackbarHostState = snackbarHostState,
                                 )
                             }
 
@@ -263,16 +273,22 @@ fun FriendsPage(
                                     friendships = friendships.filter { it.status == Status.DECLINED && it.friendId == userId },
                                     userId = userId ?: "",
                                     userViewModel = userViewModel,
+                                    friendshipViewModel = viewModel,
                                     friendsCache = friendsCache,
-                                    sectionTitle = "Incoming Requests You Declined"
+                                    sectionTitle = "Incoming Requests You Declined",
+                                    coroutineScope = coroutineScope,
+                                    snackbarHostState = snackbarHostState,
                                 )
                                 // Outgoing Friend Requests that were Declined
                                 FriendshipListSection(
                                     friendships = friendships.filter { it.status == Status.DECLINED && it.userId == userId },
                                     userId = userId ?: "",
                                     userViewModel = userViewModel,
+                                    friendshipViewModel = viewModel,
                                     friendsCache = friendsCache,
-                                    sectionTitle = "Your Outgoing Requests That Were Declined"
+                                    sectionTitle = "Your Outgoing Requests That Were Declined",
+                                    coroutineScope = coroutineScope,
+                                    snackbarHostState = snackbarHostState,
                                 )
                             }
                         }
@@ -288,7 +304,10 @@ fun FriendshipListSection(
     friendships: List<Friendship>,
     userId: String,
     userViewModel: UserViewModel,
+    friendshipViewModel: FriendshipViewModel,
     friendsCache: MutableMap<String, UserMetadata?>,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
     sectionTitle: String? = null
 ) {
     if (friendships.isEmpty()) return
@@ -317,20 +336,53 @@ fun FriendshipListSection(
             FriendListItem(
                 fullName = "${friend.firstName} ${friend.lastName}",
                 username = friend.username,
-                status = friendship.status
+                status = friendship.status,
+                isIncoming = friendship.status == Status.PENDING && friendship.friendId == userId,
+                onAccept = {
+                    coroutineScope.launch {
+                        friendship.status = Status.ACCEPTED
+                        val result = friendshipViewModel.updateFriendship(friendship)
+                        if (result.isSuccess) {
+                            if (result.isSuccess) {
+                                snackbarHostState.showSnackbar("Friend request accepted")
+                            } else {
+                                snackbarHostState.showSnackbar("Failed to accept friend request")
+                            }
+                        }
+                    }
+                },
+                onDecline = {
+                    coroutineScope.launch {
+                        friendship.status = Status.DECLINED
+                        val result = friendshipViewModel.updateFriendship(friendship)
+                        if (result.isSuccess) {
+                            snackbarHostState.showSnackbar("Friend request declined")
+                        } else {
+                            snackbarHostState.showSnackbar("Failed to decline friend request")
+                        }
+                    }
+                },
             )
         }
     }
 }
 
 @Composable
-fun FriendListItem(fullName: String, username: String, status: Status) {
+fun FriendListItem(
+    fullName: String,
+    username: String,
+    status: Status,
+    isIncoming: Boolean, // If the friend request is incoming
+    onAccept: (() -> Unit)? = null, // For accept/decline buttons
+    onDecline: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // User Icon and Username
         Icon(
             imageVector = Icons.Default.Person,
             contentDescription = "Profile",
@@ -342,6 +394,8 @@ fun FriendListItem(fullName: String, username: String, status: Status) {
             Text(text = fullName, fontWeight = FontWeight.Bold)
             Text(text = "@$username", fontSize = 12.sp, color = Color.Gray)
         }
+
+        // Request Status
         Text(
             text = status.name, // Will show "PENDING", "ACCEPTED", etc.
             fontSize = 12.sp,
@@ -352,6 +406,27 @@ fun FriendListItem(fullName: String, username: String, status: Status) {
             },
             modifier = Modifier.padding(start = 8.dp)
         )
+
+        // Buttons to Accept/Decline incoming requests
+        if (isIncoming && onAccept != null && onDecline != null) {
+            AcceptAndDeclineButtons(onAccept, onDecline)
+        }
     }
 }
+
+@Composable
+fun AcceptAndDeclineButtons(
+    onAccept: (() -> Unit), // For accept/decline buttons
+    onDecline: (() -> Unit)
+) {
+    Column {
+        TextButton(onClick = onAccept) {
+            Text("Accept", color = Color(0xFF4CAF50))
+        }
+        TextButton(onClick = onDecline) {
+            Text("Decline", color = Color(0xFFF44336))
+        }
+    }
+}
+
 

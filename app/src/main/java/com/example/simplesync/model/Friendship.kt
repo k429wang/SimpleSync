@@ -11,6 +11,6 @@ import java.util.UUID
 data class Friendship(
     @SerialName("user_id") val userId: String = UUID.randomUUID().toString(),
     @SerialName("friend_id") val friendId: String = UUID.randomUUID().toString(),
-    @SerialName("status") val status: Status,
+    @SerialName("status") var status: Status,
     @Contextual @SerialName("created_at") val createdAt: Instant = Clock.System.now(),
 )
