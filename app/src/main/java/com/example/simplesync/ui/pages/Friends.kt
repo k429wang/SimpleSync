@@ -192,9 +192,8 @@ fun FriendsPage(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val isLoading by viewModel.isLoading.collectAsState()
-
             // Friend list
+            val isLoading by viewModel.isLoading.collectAsState()
             if (isLoading) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
             } else if (loginError) {
@@ -240,6 +239,7 @@ fun FriendsPage(
                                     friendsCache = friendsCache,
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    searchQuery = searchQuery
                                 )
                             }
 
@@ -254,6 +254,7 @@ fun FriendsPage(
                                     sectionTitle = "Incoming Requests",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    searchQuery = searchQuery
                                 )
                                 // Outgoing Friend Requests
                                 FriendshipListSection(
@@ -265,6 +266,7 @@ fun FriendsPage(
                                     sectionTitle = "Outgoing Requests",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    searchQuery = searchQuery
                                 )
                             }
 
@@ -279,6 +281,7 @@ fun FriendsPage(
                                     sectionTitle = "Incoming Requests You Declined",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    searchQuery = searchQuery
                                 )
                                 // Outgoing Friend Requests that were Declined
                                 FriendshipListSection(
@@ -290,6 +293,7 @@ fun FriendsPage(
                                     sectionTitle = "Your Outgoing Requests That Were Declined",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    searchQuery = searchQuery
                                 )
                             }
                         }
@@ -309,6 +313,7 @@ fun FriendshipListSection(
     friendsCache: MutableMap<String, UserMetadata?>,
     coroutineScope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
+    searchQuery: String,
     sectionTitle: String? = null
 ) {
     if (friendships.isEmpty()) return
@@ -322,18 +327,24 @@ fun FriendshipListSection(
         )
     }
 
+    val normalizedSearchQuery = searchQuery.lowercase()
     friendships.forEach { friendship ->
         val otherUserId = if (friendship.userId == userId) friendship.friendId else friendship.userId
-        val friend = friendsCache[otherUserId]
-
         if (!friendsCache.containsKey(otherUserId)) {
+            // Add to cache if not already present
             LaunchedEffect(otherUserId) {
                 val fetched = userViewModel.getUserById(otherUserId)
                 friendsCache[otherUserId] = fetched
             }
         }
+        val friend = friendsCache[otherUserId]
 
-        if (friend != null) {
+        // Determine if the friend matches the search query.
+        val friendName = "${friend?.firstName} ${friend?.lastName}".lowercase()
+        val friendUsername = friend?.username?.lowercase() ?: ""
+        val matchesSearchQuery = (normalizedSearchQuery in friendName || normalizedSearchQuery in friendUsername)
+
+        if (friend != null && matchesSearchQuery) {
             FriendListItem(
                 fullName = "${friend.firstName} ${friend.lastName}",
                 username = friend.username,
