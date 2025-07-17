@@ -1,16 +1,21 @@
 package com.example.simplesync.ui.pages
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,20 +47,18 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 .padding(innerPadding)
                 .padding(16.dp)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            metadata?.let {
-                Text(
-                    text = "${it.firstName}'s event",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-            } ?: Text(
-                "Unknown's event",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold
+            Text(
+                text = "${metadata?.firstName ?: "Unknown"}'s event",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Event Details
             DetailRow("Time:", formatEventTime(event))
@@ -64,71 +67,69 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             DetailRow("Description:", event.description ?: "None")
             DetailRow("Visibility:", event.visibility.name.lowercase().replaceFirstChar { it.uppercase() })
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                "Your availability",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
-            Box(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .background(Color.LightGray)
-                    .padding(8.dp)
+                    .padding(vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8E8E8))
             ) {
-                // PLACE HOLDER FOR CALENDAR!!!!!!
-                // TODO: update with working calendar
-                Spacer(modifier = Modifier.height(8.dp))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        "Fill your availability",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                // Header Row for Days
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-                    days.forEach {
-                        Text(
-                            text = it,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(2.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center
-                        )
+                    // Your days + calendar grid placeholder
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(160.dp)
+                            .background(Color.White)
+                    ) {
+                        // Placeholder content
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { /* TODO: Update calendar slots */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    ) {
+                        Text("Add new", color = Color.White)
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // TODO: backend connection - user can add optional note when responding to event invite
+                    // Use shared EventField
+                    EventField(label = "Note:", value = noteText)
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { /* TODO */ },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp),
+                    ) {
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = Color.White)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("SEND", color = Color.White)
                     }
                 }
+
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            Button(
-                onClick = { /* TODO: Update calendar slots */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-            ) {
-                Text("Add new", color = Color.White)
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // TODO: backend connection - user can add optional note when responding to event invite
-//            OutlinedTextField(
-//                value = noteText,
-//                onValueChange = { noteText = it },
-//                label = { Text("Note") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
-            EventField("Note:", noteText) // TODO: formatting is weird
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = { /* TODO */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
-                Spacer(Modifier.width(4.dp))
-                Text("SEND", color = Color.White)
-            }
         }
     }
 }
@@ -136,20 +137,26 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
 @Composable
 fun DetailRow(label: String, value: String) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(vertical = 4.dp)
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
     ) {
-        Text(
-            text = "$label ",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.Black
-        )
-        Text(
-            text = value,
-            fontSize = 16.sp,
-            color = Color.DarkGray
-        )
+        Column(modifier = Modifier.width(90.dp)) {
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                color = Color.DarkGray
+            )
+        }
     }
 }
 
