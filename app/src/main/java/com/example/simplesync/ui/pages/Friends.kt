@@ -438,17 +438,19 @@ fun FriendListItem(
         }
 
 
-        // Request Status
-        Text(
-            text = status.name, // Will show "PENDING", "ACCEPTED", etc.
-            fontSize = 12.sp,
-            color = when (status) {
-                Status.ACCEPTED -> Color(0xFF4CAF50)
-                Status.PENDING -> Color(0xFFFFC107)
-                Status.DECLINED -> Color(0xFFF44336)
-            },
-            modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-        )
+        // Request Status ("PENDING" or "DECLINED" Only)
+        if(status == Status.PENDING || status == Status.DECLINED) {
+            Text(
+                text = status.name, // Will show
+                fontSize = 12.sp,
+                color = when (status) {
+                    Status.PENDING -> Color(0xFFFFC107)
+                    Status.DECLINED -> Color(0xFFF44336)
+                    else -> Color(0x00000000) // Should not happen
+                },
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+            )
+        }
 
 
         if (isIncoming && onAccept != null && onDecline != null) {
