@@ -273,7 +273,7 @@ fun FriendsPage(
                             }
 
                             DECLINED -> { // Declined Friendships
-                                // Incoming Friend Requests that were Declined
+                                // Incoming Friend Requests that they Declined
                                 FriendshipListSection(
                                     friendships = friendships.filter { it.status == Status.DECLINED && it.friendId == userId },
                                     userId = userId ?: "",
@@ -281,18 +281,6 @@ fun FriendsPage(
                                     friendshipViewModel = viewModel,
                                     friendsCache = friendsCache,
                                     sectionTitle = "Incoming Requests You Declined",
-                                    coroutineScope = coroutineScope,
-                                    snackbarHostState = snackbarHostState,
-                                    searchQuery = searchQuery
-                                )
-                                // Outgoing Friend Requests that were Declined
-                                FriendshipListSection(
-                                    friendships = friendships.filter { it.status == Status.DECLINED && it.userId == userId },
-                                    userId = userId ?: "",
-                                    userViewModel = userViewModel,
-                                    friendshipViewModel = viewModel,
-                                    friendsCache = friendsCache,
-                                    sectionTitle = "Your Outgoing Requests That Were Declined",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
                                     searchQuery = searchQuery
