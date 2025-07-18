@@ -22,7 +22,7 @@ import com.example.simplesync.model.Friendship
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.ui.components.AcceptAndDeclineButtons
-import com.example.simplesync.ui.components.DeclineButton
+import com.example.simplesync.ui.components.DeleteButton
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.components.SearchBar
@@ -458,7 +458,7 @@ fun FriendListItem(
             AcceptAndDeclineButtons(onAccept, onDecline)
         } else if (showDeleteButton && onDelete != null) {
             // Button to Delete friends (For Friends tab)
-            DeclineButton(onDelete)
+            DeleteButton(onDelete)
         }
     }
 }
