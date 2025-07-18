@@ -17,6 +17,7 @@ import com.example.simplesync.ui.components.AvailabilityGrid
 import com.example.simplesync.model.ConcreteCalendar
 import com.example.simplesync.ui.components.ProfilePicture
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
+import com.example.simplesync.viewmodel.SignInViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 
 
@@ -175,6 +176,18 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
             HorizontalDivider()
             SettingsOption("External Calendar Sign-in") {
                 navController.nav(navController.EXTERNAL_SIGN_IN)
+            }
+            HorizontalDivider()
+
+
+            val viewModel: SignInViewModel = hiltViewModel()
+            SettingsOption("Sign Out") {
+                viewModel.signOut()
+                navController.navController.navigate(navController.SIGN_IN)
+                {
+                    popUpTo(0)
+                    launchSingleTop = true
+                }
             }
             HorizontalDivider()
 

@@ -6,11 +6,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.di.SupabaseClientEntryPoint
 import com.example.simplesync.ui.navigation.SimpleSyncAppNav
 import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import dagger.hilt.android.EntryPointAccessors
 import io.github.jan.supabase.auth.auth
+import com.example.simplesync.viewmodel.SignInViewModel
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -28,10 +33,21 @@ fun MainScreen(){//viewModel: AppViewModel) {
     }
 
     // Navigate to the sign in page if not logged in
-    val isSignedIn = remember { supabaseClient.auth.currentSessionOrNull() != null }
-    LaunchedEffect(Unit) {
-        if(!isSignedIn) {
-            navController.nav(navController.SIGN_IN)
+    val signInViewModel: SignInViewModel = hiltViewModel()
+
+
+    val isSignedIn by signInViewModel.isSignedIn.collectAsState()
+    LaunchedEffect(isSignedIn) {
+        if (!isSignedIn) {
+            navController.navController.navigate(navController.SIGN_IN) {
+                popUpTo(0)
+                launchSingleTop = true
+            }
+        } else {
+            navController.navController.navigate(navController.HOME) {
+                popUpTo(0)
+                launchSingleTop = true
+            }
         }
     }
 
