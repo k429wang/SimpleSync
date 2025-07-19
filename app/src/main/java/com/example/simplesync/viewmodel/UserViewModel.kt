@@ -82,6 +82,18 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    suspend fun getUserByUsername(username: String): UserMetadata? {
+        return try {
+            supabase.from(USERS_TABLE_NAME).select {
+                filter { eq("username", username) }
+                limit(1)
+            }.decodeSingleOrNull()
+        } catch (e: Exception) {
+            _error.value = e
+            null
+        }
+    }
+
     fun updateUserMetadata(
         firstName: String,
         lastName: String,
