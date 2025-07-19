@@ -23,8 +23,10 @@ import com.example.simplesync.viewmodel.UserViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ProfileScreen(navController: SimpleSyncNavController) {
-    val viewModel: UserViewModel = hiltViewModel()
+fun ProfileScreen(
+    navController: SimpleSyncNavController,
+    viewModel: UserViewModel = hiltViewModel()
+) {
     val currUser by viewModel.currUser.collectAsState()
     val email = currUser?.authUser?.email
     val username = currUser?.userMetadata?.username
@@ -92,47 +94,12 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
             )
 
-            // PLACE HOLDER FOR CALENDAR!!!!!!
             Spacer(modifier = Modifier.height(8.dp))
 
-            Card() {
+            Card {
                 AvailabilityGrid(navController, calendar = ConcreteCalendar())
             }
 
-/*
-            // Header Row for Days
-            Row(modifier = Modifier.fillMaxWidth()) {
-                val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-                days.forEach {
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            // Availability boxes
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                repeat(7) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .padding(2.dp)
-                            .background(Color.LightGray)
-                            .border(1.dp, Color.Black)
-                    )
-                }
-            }
-*/
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(

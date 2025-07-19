@@ -17,8 +17,10 @@ import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun MyAccountPage(navController: SimpleSyncNavController) {
-    val viewModel: UserViewModel = hiltViewModel()
+fun MyAccountPage(
+    navController: SimpleSyncNavController,
+    viewModel: UserViewModel = hiltViewModel(),
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
