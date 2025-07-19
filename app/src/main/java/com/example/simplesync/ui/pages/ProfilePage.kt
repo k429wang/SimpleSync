@@ -15,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.components.AvailabilityGrid
 import com.example.simplesync.model.ConcreteCalendar
-import com.example.simplesync.ui.components.ProfilePicture
+import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.UserViewModel
 
@@ -27,6 +27,7 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
     val currUser by viewModel.currUser.collectAsState()
     val email = currUser?.authUser?.email
     val username = currUser?.userMetadata?.username
+    val pfpUrl = currUser?.userMetadata?.profilePicURL
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -81,7 +82,10 @@ fun ProfileScreen(navController: SimpleSyncNavController) {
                     )
                 }
 
-                ProfilePicture(viewModel, snackbarHostState)
+                ReadOnlyProfilePicture(
+                    imageUrl = pfpUrl,
+                    size = 96.dp
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))

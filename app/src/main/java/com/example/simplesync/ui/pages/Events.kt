@@ -26,6 +26,7 @@ import com.example.simplesync.model.Event
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.*
+import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.datetime.Instant
@@ -88,7 +89,7 @@ fun EventPage(navController: SimpleSyncNavController) {
 
             ScreenTitle("My events")
 
-            SearchBar(searchQuery, onQueryChange = { searchQuery = it })
+            SearchBar(searchQuery = searchQuery, onQueryChange = { searchQuery = it })
 
             Spacer(modifier = Modifier.height(16.dp))
 

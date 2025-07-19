@@ -1,5 +1,4 @@
 package com.example.simplesync.ui.components
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +15,6 @@ fun ScreenTitle(title: String) {
         fontSize = 30.sp,
         fontWeight = FontWeight.ExtraBold,
         modifier = Modifier
-            .fillMaxWidth()
             .padding(top = 16.dp, bottom = 12.dp)
     )
 }

@@ -31,7 +31,7 @@ import com.example.simplesync.viewmodel.UserViewModel
 fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     val userViewModel: UserViewModel = hiltViewModel()
     var metadata by remember { mutableStateOf<UserMetadata?>(null) }
-    var noteText = remember { mutableStateOf("") }
+    var noteText by remember { mutableStateOf("") }
 
     LaunchedEffect(event.owner) {
         userViewModel.fetchUserMetadataById(event.owner) {
@@ -109,9 +109,14 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // TODO: backend connection - user can add optional note when responding to event invite
-                    // Use shared EventField
-                    EventField(label = "Note:", value = noteText)
+            // TODO: backend connection - user can add optional note when responding to event invite
+//            OutlinedTextField(
+//                value = noteText,
+//                onValueChange = { noteText = it },
+//                label = { Text("Note") },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+            EventField("Note:", noteText, {noteText = it}) // TODO: formatting is weird
 
                     Spacer(Modifier.height(16.dp))
 

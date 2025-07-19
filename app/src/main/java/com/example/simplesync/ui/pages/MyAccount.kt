@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.components.BottomNavBar
+import com.example.simplesync.ui.components.EditableProfilePicture
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -34,6 +35,11 @@ fun MyAccountPage(navController: SimpleSyncNavController) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ScreenTitle("My Account")
+            EditableProfilePicture(
+                viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
+                size = 96.dp
+            )
             UserDetails(viewModel, snackbarHostState, navController)
         }
     }
@@ -52,13 +58,13 @@ fun UserDetails(
         val authUser = user.authUser
         val metadata = user.userMetadata
 
-        val firstName = remember { mutableStateOf(metadata.firstName) }
-        val lastName = remember { mutableStateOf(metadata.lastName) }
-        val username = remember { mutableStateOf(metadata.username) }
+        var firstName by remember { mutableStateOf(metadata.firstName) }
+        var lastName by remember { mutableStateOf(metadata.lastName) }
+        var username by remember { mutableStateOf(metadata.username) }
 
-        EventField("Username:", username)
-        EventField("First Name:", firstName)
-        EventField("Last Name:", lastName)
+        EventField("Username:", username, onValueChange = {username = it})
+        EventField("First Name:", firstName, onValueChange = {firstName = it})
+        EventField("Last Name:", lastName, onValueChange = {lastName = it})
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -70,9 +76,9 @@ fun UserDetails(
         Button(
             onClick = {
                 viewModel.updateUserMetadata(
-                    firstName = firstName.value,
-                    lastName = lastName.value,
-                    username = username.value
+                    firstName = firstName,
+                    lastName = lastName,
+                    username = username
                 ) { success ->
                     coroutineScope.launch {
                         if (success) {
