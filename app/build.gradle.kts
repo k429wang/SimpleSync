@@ -98,8 +98,6 @@ dependencies {
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
-    // TODO: Add the dependencies for Firebase products you want to use
-    // https://firebase.google.com/docs/android/setup#available-libraries
-    // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.onesignal:OneSignal:[5.1.6, 5.1.99]")
 }
