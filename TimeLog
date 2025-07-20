@@ -16,3 +16,5 @@
 | 2025/07/14 | ------- | ---- | ------- | 3 hours | ------  | ----- | Allow users to edit personal account information
 | 2025/07/14 | ------- | ---- | ------- | ------- | 4 hour  | ----- | Implement Adding friends, bunch of reworking
 | 2025/07/16 | ------- | ---- | ------- | ------- | 5 hour  | ----- | Accept/Deny, Friend PFPs, Searchbar, Delete Friends
+| 2025/07/17 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested Implement Friends PR
+| 2025/07/20 | ------- | ---- | ------- | 2 hours | ------  | ----- | Implement descriptive error messages
