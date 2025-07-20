@@ -9,6 +9,9 @@ plugins {
     // hilt (for dep injection)
     id("com.google.dagger.hilt.android") version "2.56.2"
     id("com.google.devtools.ksp") version "2.1.21-2.0.1"
+
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -92,4 +95,11 @@ dependencies {
     // coil for image loading
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    // TODO: Add the dependencies for Firebase products you want to use
+    // https://firebase.google.com/docs/android/setup#available-libraries
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
 }

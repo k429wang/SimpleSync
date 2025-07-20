@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "581060229624",
+    "project_id": "simplesync-93f7d",
+    "storage_bucket": "simplesync-93f7d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:581060229624:android:03a953a4700c4168d1fe0d",
+        "android_client_info": {
+          "package_name": "com.example.simplesync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCgY276o8vrWTyOOuHYyL4zKOGRgPVAfaA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
