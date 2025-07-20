@@ -82,6 +82,48 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    suspend fun getUserByUsername(username: String): UserMetadata? {
+        return try {
+            supabase.from(USERS_TABLE_NAME).select {
+                filter { eq("username", username) }
+                limit(1)
+            }.decodeSingleOrNull()
+        } catch (e: Exception) {
+            _error.value = e
+            null
+        }
+    }
+
+    fun updateUserMetadata(
+        firstName: String,
+        lastName: String,
+        username: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        val userId = _currUser.value?.authUser?.id ?: return onResult(false)
+
+        viewModelScope.launch {
+            try {
+                supabase.from(USERS_TABLE_NAME).update(
+                    {
+                        set("first_name", firstName)
+                        set("last_name", lastName)
+                        set("username", username)
+                    }
+                ) {
+                    filter { eq("id", userId) }
+                }
+
+                // Refresh user data after update
+                fetchCurrentUser()
+                onResult(true)
+            } catch (e: Exception) {
+                _error.value = e
+                onResult(false)
+            }
+        }
+    }
+
     suspend fun uploadProfilePicture(imageBytes: ByteArray): Boolean {
         val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no user
         val filePath = "$userId/profile_pic.jpg" // profile-pictures/<user-id>/profile_pic.jpg
