@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -30,6 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -49,6 +54,7 @@ fun SignIn(
     val signInResult by viewModel.signInResult.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect (signInResult) {
         signInResult?.let {
@@ -60,7 +66,12 @@ fun SignIn(
                 navController.nav(navController.EVENTS) // Go to home screen
             }.onFailure { e ->
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Error: ${e.message}")
+                    val cleanMessage = if (e.message?.contains("invalid_credentials") == true) {
+                        "Invalid email or password"
+                    } else {
+                        "Sign in failed"
+                    }
+                    snackbarHostState.showSnackbar("Error: $cleanMessage")
                 }
             }
         }
@@ -79,7 +90,16 @@ fun SignIn(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }
+                )
             )
 
 
@@ -88,6 +108,17 @@ fun SignIn(
                 onValueChange = { password = it },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (email.isNotBlank() && password.isNotBlank()) {
+                            viewModel.signIn(email, password)
+                        }
+                    }
+                ),
                 visualTransformation = if (shouldShowPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 // Button to toggle visibility of password
                 trailingIcon = {
