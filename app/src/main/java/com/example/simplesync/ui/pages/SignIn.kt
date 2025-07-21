@@ -1,5 +1,6 @@
 package com.example.simplesync.ui.pages
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
+import com.onesignal.OneSignal
 
 @Composable
 fun SignIn(
@@ -57,6 +59,9 @@ fun SignIn(
                     snackbarHostState.showSnackbar("Signed in successfully!")
                 }
                 userViewModel.fetchCurrentUser() // Set currUser in userViewModel
+                val playerId = OneSignal.User.pushSubscription.id // Set player_id for OneSignal
+                userViewModel.savePlayerId(playerId)
+
                 navController.nav(navController.EVENTS) // Go to home screen
             }.onFailure { e ->
                 coroutineScope.launch {

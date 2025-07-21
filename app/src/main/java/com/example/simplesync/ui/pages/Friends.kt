@@ -27,6 +27,7 @@ import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.FriendshipViewModel
+import com.example.simplesync.viewmodel.NotificationViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -61,6 +62,9 @@ fun FriendsPage(
     // Tabs
     val tabTitles = listOf<String>("Friends", "Pending", "Declined")
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+
+    // Notifications
+    val notificationViewModel: NotificationViewModel = hiltViewModel()
 
     LaunchedEffect(currUser) {
         if (currUser == null) {
@@ -158,6 +162,12 @@ fun FriendsPage(
                                                 )
                                             )
 
+                                            // Send friend request notification
+                                            notificationViewModel.sendNotificationToUser(
+                                                playerId = friend.playerId,
+                                                message = "${currUser?.userMetadata?.username} sent you a friend request"
+                                            )
+
                                             // Display message for results
                                             if (result.isSuccess) {
                                                 snackbarHostState.showSnackbar("Friend request sent to @${friend.username}")
@@ -241,6 +251,7 @@ fun FriendsPage(
                                     friendsCache = friendsCache,
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    notificationViewModel = notificationViewModel,
                                     searchQuery = searchQuery
                                 )
                             }
@@ -256,6 +267,7 @@ fun FriendsPage(
                                     sectionTitle = "Incoming Requests",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    notificationViewModel = notificationViewModel,
                                     searchQuery = searchQuery
                                 )
                                 // Outgoing Friend Requests
@@ -268,6 +280,7 @@ fun FriendsPage(
                                     sectionTitle = "Outgoing Requests",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    notificationViewModel = notificationViewModel,
                                     searchQuery = searchQuery
                                 )
                             }
@@ -283,6 +296,7 @@ fun FriendsPage(
                                     sectionTitle = "Incoming Requests You Declined",
                                     coroutineScope = coroutineScope,
                                     snackbarHostState = snackbarHostState,
+                                    notificationViewModel = notificationViewModel,
                                     searchQuery = searchQuery
                                 )
                             }
@@ -304,6 +318,7 @@ fun FriendshipListSection(
     coroutineScope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
     searchQuery: String,
+    notificationViewModel: NotificationViewModel,
     sectionTitle: String? = null
 ) {
     if (friendships.isEmpty()) return
@@ -359,11 +374,22 @@ fun FriendshipListSection(
                         if (result.isSuccess) {
                             if (result.isSuccess) {
                                 snackbarHostState.showSnackbar("Friend request accepted")
+                                // Send push notification to other user
+                                val recipient = userViewModel.getUserById(friendship.userId)
+                                val playerId = recipient?.playerId
+                                val currUsername = userViewModel.currUser.value?.userMetadata?.username
+                                if (playerId != null && currUsername != null) {
+                                    notificationViewModel.sendNotificationToUser(
+                                        playerId = playerId,
+                                        message = "@$currUsername accepted your friend request!"
+                                    )
+                                }
                             } else {
                                 snackbarHostState.showSnackbar("Failed to accept friend request")
                             }
                         }
                     }
+
                 },
                 onDecline = {
                     coroutineScope.launch {
@@ -371,6 +397,16 @@ fun FriendshipListSection(
                         val result = friendshipViewModel.updateFriendship(updatedFriendship, userId)
                         if (result.isSuccess) {
                             snackbarHostState.showSnackbar("Friend request declined")
+                            // Send push notification to other user
+                            val recipient = userViewModel.getUserById(friendship.userId)
+                            val playerId = recipient?.playerId
+                            val currUsername = userViewModel.currUser.value?.userMetadata?.username
+                            if (playerId != null && currUsername != null) {
+                                notificationViewModel.sendNotificationToUser(
+                                    playerId = playerId,
+                                    message = "@$currUsername declined your friend request."
+                                )
+                            }
                         } else {
                             snackbarHostState.showSnackbar("Failed to decline friend request")
                         }
