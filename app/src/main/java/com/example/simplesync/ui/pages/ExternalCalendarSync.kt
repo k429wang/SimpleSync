@@ -7,6 +7,7 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -16,6 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.simplesync.viewmodel.ExternalCalendarViewModel
 
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -24,8 +27,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
+
 @Composable
-fun LaunchGoogleSignIn(googleAccount: androidx.compose.runtime.MutableState<String>) {
+fun LaunchGoogleSignIn(calendarViewModel: ExternalCalendarViewModel) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -33,9 +37,9 @@ fun LaunchGoogleSignIn(googleAccount: androidx.compose.runtime.MutableState<Stri
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
-            googleAccount.value = account?.email ?: "Unknown email"
+            calendarViewModel.setGoogleAccount(account)
         } catch (e: ApiException) {
-            googleAccount.value = "Sign-in failed"
+            calendarViewModel.setGoogleAccount(null)
             Log.e("GoogleSignIn", "Sign-in error", e)
         }
     }
@@ -91,6 +95,16 @@ private const val CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar"
 
 @Composable
 fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
+    val calendarViewModel: ExternalCalendarViewModel = hiltViewModel()
+    val context = LocalContext.current
+
+    // Always check for a cached Google account when entering this screen
+    LaunchedEffect(Unit) {
+        if (calendarViewModel.googleAccount.value == null) {
+            val cachedAccount = GoogleSignIn.getLastSignedInAccount(context)
+            calendarViewModel.setGoogleAccount(cachedAccount)
+        }
+    }
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
     ) { padding ->
@@ -119,18 +133,19 @@ fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val context = LocalContext.current
-                        val account = GoogleSignIn.getLastSignedInAccount(context)
-                        val googleAccount = remember {
-                            mutableStateOf(account?.email ?: "Not synced")
-                        }
+//                        val account = GoogleSignIn.getLastSignedInAccount(context)
+//                        val googleAccount = remember {
+//                            mutableStateOf(account?.email ?: "Not synced")
+//                        }
                         val outlookAccount = remember { mutableStateOf("Not synced") }
                         val uploadedFileName = remember { mutableStateOf("No file uploaded") }
 
                         Spacer(modifier = Modifier.height(0.dp))
 
-                        LaunchGoogleSignIn(googleAccount)
+                        LaunchGoogleSignIn(calendarViewModel)
+                        val googleAccount = calendarViewModel.googleAccount.value
                         Text(
-                            text = "Current: ${googleAccount.value}",
+                            text = "Current: ${googleAccount?.email ?: "Not synced"}",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
