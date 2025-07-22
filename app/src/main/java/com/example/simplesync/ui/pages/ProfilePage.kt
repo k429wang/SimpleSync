@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,6 +20,15 @@ import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.viewmodel.SignInViewModel
 import com.example.simplesync.viewmodel.UserViewModel
+import com.example.simplesync.viewmodel.ExternalCalendarViewModel
+import com.example.simplesync.viewmodel.toAppEvent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.livedata.observeAsState
+
+import android.util.Log
+import com.example.simplesync.viewmodel.EventViewModel
+
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -32,6 +42,32 @@ fun ProfileScreen(
     val username = currUser?.userMetadata?.username
     val pfpUrl = currUser?.userMetadata?.profilePicURL
     val snackbarHostState = remember { SnackbarHostState() }
+    val calendarViewModel: ExternalCalendarViewModel = hiltViewModel()
+    val eventViewModel: EventViewModel = hiltViewModel()
+    val googleAccount = calendarViewModel.googleAccount.value
+
+    val context = LocalContext.current
+
+    val consentIntent by calendarViewModel.consentRequiredIntent.observeAsState()
+    val consentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { _ ->
+        // After user consents, retry fetching events
+        calendarViewModel.fetchGoogleCalendarEvents(context)
+    }
+    LaunchedEffect(consentIntent) {
+        consentIntent?.let {
+            consentLauncher.launch(it)
+            calendarViewModel.consentRequiredIntent.value = null // Reset after launching
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (calendarViewModel.googleAccount.value == null) {
+            val cachedAccount = com.google.android.gms.auth.api.signin.GoogleSignIn.getLastSignedInAccount(context)
+            calendarViewModel.setGoogleAccount(cachedAccount)
+        }
+    }
 
     LaunchedEffect(Unit) {
         val updated = navController.navController
@@ -119,7 +155,22 @@ fun ProfileScreen(
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
-                    onClick = { /* TODO: Sync external calendar */ },
+                    onClick = {
+                        calendarViewModel.fetchGoogleCalendarEvents(context) { calendarEvents ->
+                            currUser?.authUser?.id?.let { ownerId ->
+                                // grab existing events from your app/database
+                                val existingAppEvents = eventViewModel.events.value ?: emptyList()
+                                calendarEvents.forEach { calendarEvent ->
+                                    val appEvent = calendarEvent.toAppEvent(ownerId)
+                                    //check for dup
+                                    if (appEvent != null && !eventViewModel.isDuplicateEvent(appEvent.externalId)) {
+                                        eventViewModel.createEvent(appEvent)
+                                    }
+                                }
+                                Log.d("PROFILE", "Imported ${calendarEvents.size} events")
+                            }
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
                     modifier = Modifier.weight(1f)
                 ) {
