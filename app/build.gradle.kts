@@ -9,6 +9,9 @@ plugins {
     // hilt (for dep injection)
     id("com.google.dagger.hilt.android") version "2.56.2"
     id("com.google.devtools.ksp") version "2.1.21-2.0.1"
+
+    // Add the Google services Gradle plugin
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -23,11 +26,13 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Retrieve supabase env vars from local.properties file
+        // Retrieve supabase + onesignal env vars from local.properties file
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${properties.getProperty("SUPABASE_ANON_KEY")}\"")
         buildConfigField("String", "SUPABASE_URL", "\"${properties.getProperty("SUPABASE_URL")}\"")
+        buildConfigField("String", "ONESIGNAL_API_KEY", "\"${properties.getProperty("ONESIGNAL_API_KEY")}\"")
+        buildConfigField("String", "ONESIGNAL_APP_ID", "\"${properties.getProperty("ONESIGNAL_APP_ID")}\"")
     }
 
     buildTypes {
@@ -48,7 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
-        android.buildFeatures.buildConfig = true
+        buildConfig = true
     }
 }
 
@@ -92,4 +97,9 @@ dependencies {
     // coil for image loading
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.onesignal:OneSignal:5.1.8")
 }

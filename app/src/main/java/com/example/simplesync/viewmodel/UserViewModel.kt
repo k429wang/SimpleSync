@@ -124,6 +124,24 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    // updates player_id of device
+    // used by OneSignal for push notifications
+    fun savePlayerId(playerId: String) {
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return
+        viewModelScope.launch {
+            try {
+                supabase.from("users").update({
+                    set("player_id", playerId)
+                }) {
+                    filter { eq("id", userId) }
+                }
+            } catch (e: Exception) {
+                _error.value = e
+            }
+        }
+    }
+
+
     suspend fun uploadProfilePicture(imageBytes: ByteArray): Boolean {
         val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no user
         val filePath = "$userId/profile_pic.jpg" // profile-pictures/<user-id>/profile_pic.jpg
