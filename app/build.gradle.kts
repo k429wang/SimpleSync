@@ -85,6 +85,9 @@ dependencies {
 
     // oauth services
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
 
     // hilt
     implementation(libs.hilt.android)
