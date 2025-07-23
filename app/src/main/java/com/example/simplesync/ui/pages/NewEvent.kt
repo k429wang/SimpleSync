@@ -1,6 +1,7 @@
 package com.example.simplesync.ui.pages
 
 import DropdownField
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -57,16 +58,17 @@ fun NewEventPage(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Popup for event creation results
-    LaunchedEffect (createEventResult) {
-        createEventResult?.let {
-            it.onSuccess {
+    // Handle createEventResult
+    LaunchedEffect(createEventResult) {
+        createEventResult?.let { result ->
+            result.onSuccess { event ->
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
-                navController.nav(navController.EVENTS) // TODO: Update to navigate to the created event's page
+                // Navigate using the actual event
+                navController.nav(navController.eventDetailsRoute(event.id))
             }.onFailure { e ->
-                print("ERROR: ${e.message}")
+                Log.e("NewEventPage", "Event creation failed", e)
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Error: ${e.message}")
                 }
@@ -132,15 +134,11 @@ fun NewEventPage(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Fields that will be synced with the backend
-            EventField("Name:", name, {name = it})
-            EventField("Description:", description, {description = it})
+            EventField("Name:", name) {name = it}
+            EventField("Description:", description) {description = it}
 
-            DateTimePickerField("Start Time", startTime) {
-                startTime = it
-            }
-            DateTimePickerField("End Time", endTime) {
-                endTime = it
-            }
+            DateTimePickerField("Start Time", startTime) { startTime = it }
+            DateTimePickerField("End Time", endTime) { endTime = it }
 
             DropdownField(
                 label = "Type:",

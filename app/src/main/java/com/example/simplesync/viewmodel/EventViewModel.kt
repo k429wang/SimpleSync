@@ -24,8 +24,8 @@ class EventViewModel @Inject constructor(
     val selectedEvent: StateFlow<Event?> = _selectedEvent
 
     // Used to display success/failure messages
-    private val _eventResult = MutableStateFlow<Result<Boolean>?>(null)
-    val eventResult: StateFlow<Result<Boolean>?> = _eventResult
+    private val _eventResult = MutableStateFlow<Result<Event>?>(null)
+    val eventResult: StateFlow<Result<Event>?> = _eventResult
 
     // Retrieve the events for a specific user
     fun fetchEventsForUser(userId: String) {
@@ -37,13 +37,14 @@ class EventViewModel @Inject constructor(
                     }
                 }.decodeList<Event>()
                 _events.value = fetched
-                _eventResult.value = Result.success(true)
             } catch (e: Exception) {
-                _eventResult.value = Result.failure(e)
+                // Handle failure in frontend
+                _events.value = emptyList()
                 Log.e("EventViewModel", "Decoding failed", e)
             }
         }
     }
+
     // Retrieve event based on event ID
     fun fetchEventById(eventId: String) {
         viewModelScope.launch {
@@ -59,6 +60,7 @@ class EventViewModel @Inject constructor(
             } catch (e: Exception) {
                 // Handle failure in frontend, since it's a simple targeted fetch
                 _selectedEvent.value = null
+                Log.e("EventViewModel", "Fetching failed", e)
             }
         }
     }
@@ -67,10 +69,13 @@ class EventViewModel @Inject constructor(
     fun createEvent(event: Event) {
         viewModelScope.launch {
             try {
-                supabase.from(EVENTS_TABLE).insert(event)
-                fetchEventsForUser(event.owner) // Update state with latest list of events
-                _eventResult.value = Result.success(true)
+                val inserted = supabase.from(EVENTS_TABLE).insert(event) {
+                    select()
+                }.decodeSingle<Event>()
+                fetchEventsForUser(inserted.owner) // Update state with latest list of events
+                _eventResult.value = Result.success(inserted)
             } catch (e: Exception) {
+                // Handle failure in frontend
                 _eventResult.value = Result.failure(e)
             }
         }
@@ -80,14 +85,16 @@ class EventViewModel @Inject constructor(
     fun updateEvent(event: Event) {
         viewModelScope.launch {
             try {
-                supabase.from(EVENTS_TABLE).update(event) {
+                val inserted = supabase.from(EVENTS_TABLE).update(event) {
                         filter {
                             eq("id", event.id)
                         }
-                    }
-                fetchEventsForUser(event.owner) // Update state with latest list of events
-                _eventResult.value = Result.success(true)
+                        select()
+                    }.decodeSingle<Event>()
+                fetchEventsForUser(inserted.owner) // Update state with latest list of events
+                _eventResult.value = Result.success(inserted)
             } catch (e: Exception) {
+                // Handle failure in frontend
                 _eventResult.value = Result.failure(e)
             }
         }
