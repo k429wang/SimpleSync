@@ -3,7 +3,10 @@ package com.example.simplesync.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplesync.model.Attendee
 import com.example.simplesync.model.Event
+import com.example.simplesync.model.EventRole
+import com.example.simplesync.model.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
@@ -13,6 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 const val EVENTS_TABLE = "events"
+const val ATTENDEES_TABLE = "attendees"
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
@@ -26,6 +30,12 @@ class EventViewModel @Inject constructor(
     // Used to display success/failure messages
     private val _eventResult = MutableStateFlow<Result<Event>?>(null)
     val eventResult: StateFlow<Result<Event>?> = _eventResult
+
+    private val _attendeeResult = MutableStateFlow<Result<Attendee>?>(null)
+    val attendeeResult: StateFlow<Result<Attendee>?> = _attendeeResult
+
+    private val _attendeesForEvent = MutableStateFlow<List<Attendee>>(emptyList())
+    val attendeesForEvent: StateFlow<List<Attendee>> = _attendeesForEvent
 
     // Retrieve the events for a specific user
     fun fetchEventsForUser(userId: String) {
@@ -65,10 +75,27 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    // Retrieve the attendees for an event
+    fun fetchAttendeesForEvent(eventId: String) {
+        viewModelScope.launch {
+            try {
+                val attendees = supabase.from(ATTENDEES_TABLE).select {
+                    filter { eq("event_id", eventId) }
+                }.decodeList<Attendee>()
+
+                _attendeesForEvent.value = attendees
+            } catch (e: Exception) {
+                Log.e("EventViewModel", "Failed to fetch attendees", e)
+            }
+        }
+    }
+
     // Create an event
     fun createEvent(event: Event) {
         viewModelScope.launch {
             try {
+                // Insert into events
+                // NOTE that a corresponding Attendees row will be created via Supabase Trigger
                 val inserted = supabase.from(EVENTS_TABLE).insert(event) {
                     select()
                 }.decodeSingle<Event>()
@@ -77,6 +104,47 @@ class EventViewModel @Inject constructor(
             } catch (e: Exception) {
                 // Handle failure in frontend
                 _eventResult.value = Result.failure(e)
+            }
+        }
+    }
+
+    // Invite a user to an event
+    fun inviteUserToEvent(eventId: String, toUser: String, fromUser: String, role: EventRole) {
+        viewModelScope.launch {
+            try {
+                val inserted = supabase.from(ATTENDEES_TABLE).insert(
+                    Attendee(
+                        eventId=eventId,
+                        userId=toUser,
+                        role=role,
+                        invitedBy=fromUser,
+                        inviteStatus=Status.PENDING,
+                    )
+                ) {
+                    select()
+                }.decodeSingle<Attendee>()
+
+                fetchAttendeesForEvent(inserted.eventId)
+                _attendeeResult.value = Result.success(inserted)
+            } catch (e: Exception) {
+                // Handle failure in frontend
+                _attendeeResult.value = Result.failure(e)
+            }
+        }
+    }
+
+    fun removeAttendee(eventId: String, userId: String) {
+        viewModelScope.launch {
+            try {
+                supabase.from(ATTENDEES_TABLE).delete {
+                    filter {
+                        eq("event_id", eventId)
+                        eq("user_id", userId)
+                    }
+                }
+                fetchAttendeesForEvent(eventId)
+            } catch (e: Exception) {
+                Log.e("EventViewModel", "Failed to remove attendee", e)
             }
         }
     }
@@ -99,5 +167,4 @@ class EventViewModel @Inject constructor(
             }
         }
     }
-
 }
