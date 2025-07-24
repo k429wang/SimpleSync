@@ -82,12 +82,54 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
+            // Event Name
             Text(
-                text = "${metadata?.firstName ?: "Unknown"}'s event",
+                text = event.name,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Owner
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+            ) {
+                if (!metadata?.profilePicURL.isNullOrEmpty()) {
+                    ReadOnlyProfilePicture(
+                        imageUrl = metadata!!.profilePicURL,
+                        size = 48.dp,
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Owner",
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Column {
+                    Text(
+                        text = "Event Owner",
+                        fontSize = 12.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "${metadata?.firstName ?: "Unknown"} ${metadata?.lastName ?: ""}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
+
 
             Spacer(modifier = Modifier.height(8.dp))
             HorizontalDivider()
