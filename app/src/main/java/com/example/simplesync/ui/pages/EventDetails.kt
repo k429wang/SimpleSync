@@ -86,6 +86,8 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     // Fill your availability
     var noteText by remember { mutableStateOf("") }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(event.owner, event.id) {
         // Always try to fetch event owner's metadata
         if (event.owner.isNotBlank()) {
@@ -106,16 +108,18 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             result.fold(
                 onSuccess = { updated ->
                     savedEvent = updated  // Replace with actual updated event from server
+                    snackbarHostState.showSnackbar("Event updated successfully.")
                 },
                 onFailure = {
                     savedEvent = oldSavedEvent  // Roll back optimistic update
+                    snackbarHostState.showSnackbar("Failed to update event.")
                 }
             )
         }
     }
 
-
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = { BottomNavBar(navController) }
     ) { innerPadding ->
         Column(
