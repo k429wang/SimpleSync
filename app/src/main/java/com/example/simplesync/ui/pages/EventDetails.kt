@@ -30,6 +30,7 @@ import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.model.Visibility
+import com.example.simplesync.model.displayName
 import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.EventFormFields
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
@@ -49,6 +50,8 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     // Events
     val eventViewModel: EventViewModel = hiltViewModel()
 
+    // Baseline copy that will change after each successful save
+    var savedEvent by remember { mutableStateOf(event) }
     // Form state (if user is owner or editor of this event)
     var name by remember { mutableStateOf(event.name) }
     var description by remember { mutableStateOf(event.description ?: "") }
@@ -58,12 +61,15 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     var location by remember { mutableStateOf(event.location ?: "") }
     var recurrence by remember { mutableStateOf(event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() }) }
     var visibility by remember { mutableStateOf(event.visibility.name.lowercase().replaceFirstChar { it.uppercase() }) }
+    // Observe the ViewModel’s update result ------------------------------
+    val eventResult by eventViewModel.eventResult.collectAsState(initial = null)
+    var oldSavedEvent by remember { mutableStateOf(event) }
 
     // User
     val userViewModel: UserViewModel = hiltViewModel()
     val currUser by userViewModel.currUser.collectAsState()
     val userId = currUser?.authUser?.id
-    var metadata by remember { mutableStateOf<UserMetadata?>(null) }
+    var ownerMetadata by remember { mutableStateOf<UserMetadata?>(null) }
 
     // Friends
     val friendshipViewModel: FriendshipViewModel = hiltViewModel()
@@ -86,12 +92,30 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             return@LaunchedEffect
         }
 
+        if (event.owner.isNotBlank()) {
+            userViewModel.fetchUserMetadataById(event.owner) { ownerMetadata = it }
+        }
+
         if (userId != null) {
-            userViewModel.fetchUserMetadataById(userId) { metadata = it }
             friendshipViewModel.fetchFriendshipsForUser(userId)
-            eventViewModel.fetchAttendeesForEvent(event.id)
+        }
+
+        eventViewModel.fetchAttendeesForEvent(event.id)
+    }
+
+    LaunchedEffect(eventResult) {
+        eventResult?.let { result ->
+            result.fold(
+                onSuccess = { updated ->
+                    savedEvent = updated  // Replace with actual updated event from server
+                },
+                onFailure = {
+                    savedEvent = oldSavedEvent  // Roll back optimistic update
+                }
+            )
         }
     }
+
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
@@ -121,9 +145,9 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 modifier = Modifier
                     .padding(bottom = 8.dp)
             ) {
-                if (!metadata?.profilePicURL.isNullOrEmpty()) {
+                if (!ownerMetadata?.profilePicURL.isNullOrEmpty()) {
                     ReadOnlyProfilePicture(
-                        imageUrl = metadata!!.profilePicURL,
+                        imageUrl = ownerMetadata!!.profilePicURL,
                         size = 48.dp,
                     )
                 } else {
@@ -143,7 +167,9 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                         color = Color.Gray
                     )
                     Text(
-                        text = "${metadata?.firstName ?: "Unknown"} ${metadata?.lastName ?: ""}",
+                        text = ownerMetadata?.let {
+                            "${it.firstName} ${it.lastName}"
+                        } ?: "Unknown",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -159,14 +185,15 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             // Event Details
             if(userRole == EventRole.OWNER || userRole == EventRole.EDITOR) {
                 // Determine if the fields have had any changes
-                val hasChanges = name != event.name ||
-                        description != (event.description ?: "") ||
-                        startTime != event.startTime ||
-                        endTime != event.endTime ||
-                        type != event.type.name.lowercase().replaceFirstChar { it.uppercase() } ||
-                        location != (event.location ?: "") ||
-                        recurrence != event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() } ||
-                        visibility != event.visibility.name.lowercase().replaceFirstChar { it.uppercase() }
+                val hasChanges =
+                            name        != savedEvent.name                               ||
+                            description != (savedEvent.description ?: "")                ||
+                            startTime   != savedEvent.startTime                          ||
+                            endTime     != savedEvent.endTime                            ||
+                            type        != savedEvent.type.displayName()                 ||
+                            location    != (savedEvent.location ?: "")                   ||
+                            recurrence  != savedEvent.recurrence.displayName()           ||
+                            visibility  != savedEvent.visibility.displayName()
 
                 // Show editable fields
                 EventFormFields(
@@ -202,6 +229,13 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                             recurrence = Recurrence.valueOf(recurrence.uppercase()),
                             visibility = Visibility.valueOf(visibility.uppercase())
                         )
+                        // Backup in case we want to rollback later
+                        oldSavedEvent = savedEvent
+
+                        // Optimistically assume this update will succeed
+                        savedEvent = updatedEvent
+
+                        // Trigger backend call
                         eventViewModel.updateEvent(updatedEvent, userId)
                     },
                     enabled = hasChanges, // Only clickable if something changed
