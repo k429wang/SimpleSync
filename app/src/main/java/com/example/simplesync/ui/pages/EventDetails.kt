@@ -87,21 +87,19 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     var noteText by remember { mutableStateOf("") }
 
     LaunchedEffect(event.owner, event.id) {
-        if (currUser == null) {
-            // Don't do anything yet; wait until it's settled
-            return@LaunchedEffect
-        }
-
+        // Always try to fetch event owner's metadata
         if (event.owner.isNotBlank()) {
             userViewModel.fetchUserMetadataById(event.owner) { ownerMetadata = it }
         }
 
+        // Current user-dependent logic
         if (userId != null) {
             friendshipViewModel.fetchFriendshipsForUser(userId)
         }
 
         eventViewModel.fetchAttendeesForEvent(event.id)
     }
+
 
     LaunchedEffect(eventResult) {
         eventResult?.let { result ->
