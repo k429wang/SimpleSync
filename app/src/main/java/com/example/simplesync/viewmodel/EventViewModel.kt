@@ -150,16 +150,20 @@ class EventViewModel @Inject constructor(
     }
 
     // Update an existing event's fields
-    fun updateEvent(event: Event) {
+    fun updateEvent(event: Event, byUser: String?) {
         viewModelScope.launch {
             try {
+                if (byUser == null) {
+                    throw IllegalArgumentException("byUser must not be null when updating an event.")
+                }
+
                 val inserted = supabase.from(EVENTS_TABLE).update(event) {
                         filter {
                             eq("id", event.id)
                         }
                         select()
                     }.decodeSingle<Event>()
-                fetchEventsForUser(inserted.owner) // Update state with latest list of events
+                fetchEventsForUser(byUser) // Update state with latest list of events
                 _eventResult.value = Result.success(inserted)
             } catch (e: Exception) {
                 // Handle failure in frontend

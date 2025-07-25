@@ -24,7 +24,9 @@ import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.model.Event
 import com.example.simplesync.model.EventRole
+import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Friendship
+import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.model.Visibility
@@ -156,6 +158,16 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
 
             // Event Details
             if(userRole == EventRole.OWNER || userRole == EventRole.EDITOR) {
+                // Determine if the fields have had any changes
+                val hasChanges = name != event.name ||
+                        description != (event.description ?: "") ||
+                        startTime != event.startTime ||
+                        endTime != event.endTime ||
+                        type != event.type.name.lowercase().replaceFirstChar { it.uppercase() } ||
+                        location != (event.location ?: "") ||
+                        recurrence != event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() } ||
+                        visibility != event.visibility.name.lowercase().replaceFirstChar { it.uppercase() }
+
                 // Show editable fields
                 EventFormFields(
                     name = name,
@@ -175,6 +187,31 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                     visibility = visibility,
                     onVisibilityChange = { visibility = it }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        val updatedEvent = event.copy(
+                            name = name,
+                            description = description.ifBlank { null },
+                            startTime = startTime,
+                            endTime = endTime,
+                            type = EventType.valueOf(type.uppercase()),
+                            location = location.ifBlank { null },
+                            recurrence = Recurrence.valueOf(recurrence.uppercase()),
+                            visibility = Visibility.valueOf(visibility.uppercase())
+                        )
+                        eventViewModel.updateEvent(updatedEvent, userId)
+                    },
+                    enabled = hasChanges, // Only clickable if something changed
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
+                ) {
+                    Text("Update Event", color = Color.White)
+                }
             } else {
                 // Show readonly fields
                 DetailRow("Time:", formatEventTime(event))
@@ -197,7 +234,9 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 val openInviteDialog = remember { mutableStateOf(false) }
                 Button(
                     onClick = { openInviteDialog.value = true },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .height(48.dp)
+                        .fillMaxWidth()
                 ) {
                     Text("Invite Friends to This Event")
                 }
