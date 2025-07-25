@@ -29,6 +29,7 @@ fun DropdownField(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
             modifier = Modifier
+                .width(100.dp) // Matches EventField
                 .padding(end = 4.dp)
         )
 
