@@ -12,9 +12,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import org.json.JSONObject
 import com.example.simplesync.BuildConfig
-import com.example.simplesync.model.Event
 import com.example.simplesync.model.UserMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
 import okhttp3.Headers
@@ -41,7 +41,9 @@ class NotificationViewModel @Inject constructor(
     private val supabase: SupabaseClient
 ) : ViewModel() {
 
-    private val _notifications = MutableStateFlow(GroupedNotifications(emptyList(), emptyList(), emptyList(), emptyList()))
+    private val _notifications =
+        MutableStateFlow(GroupedNotifications(emptyList(), emptyList(), emptyList(), emptyList()))
+    val notifications: StateFlow<GroupedNotifications> = _notifications // GroupedNotifications
 
     suspend fun sendNotificationToUser(playerId: String?, message: String): Boolean {
         return try {
@@ -111,39 +113,58 @@ class NotificationViewModel @Inject constructor(
     fun fetchNotifsForUser(userId: String) {
         viewModelScope.launch {
             try {
+//                val fetched = supabase.from(NOTIFS_TABLE)
+//                    .select("*, sender_id(first_name)")
+//                    .eq("user_id", userId)
+//                    .decodeList<Notification>()
                 val fetched = supabase.from(NOTIFS_TABLE).select {
                     filter {
                         eq("user_id", userId)
                     }
                 }.decodeList<Notification>()
+                Log.d("NOTIF_VIEWMODEL", "fetched notifs: $fetched")
 
-                val now = Clock.System.now()
-                val todayStart = now.toLocalDateTime(TimeZone.currentSystemDefault()).date.atStartOfDayIn(TimeZone.currentSystemDefault())
-                val yesterdayStart = todayStart.minus(1, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
-                val weekStart = todayStart.minus(7, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
-
-                val today = mutableListOf<Notification>()
-                val yesterday = mutableListOf<Notification>()
-                val last7Days = mutableListOf<Notification>()
-                val older = mutableListOf<Notification>()
-
-                for (notif in fetched) {
-                    when {
-                        notif.timestamp >= todayStart -> today.add(notif)
-                        notif.timestamp >= yesterdayStart -> yesterday.add(notif)
-                        notif.timestamp >= weekStart -> last7Days.add(notif)
-                        else -> older.add(notif)
-                    }
-                }
-
-                _notifications.value = GroupedNotifications(
-                    today = today,
-                    yesterday = yesterday,
-                    last7Days = last7Days,
-                    older = older
-                )
+                _notifications.value = groupNotifications(populateSenderUsernames(fetched))
             } catch (e: Exception) {
                 Log.e("NotificationViewModel", "Failed to fetch notifications", e)
+            }
+        }
+    }
+
+    private fun groupNotifications(notifs: List<Notification>): GroupedNotifications {
+        val now = Clock.System.now()
+        val todayStart =
+            now.toLocalDateTime(TimeZone.currentSystemDefault()).date.atStartOfDayIn(TimeZone.currentSystemDefault())
+        val yesterdayStart = todayStart.minus(1, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+        val weekStart = todayStart.minus(7, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+
+        val todayList = mutableListOf<Notification>()
+        val yesterdayList = mutableListOf<Notification>()
+        val last7DaysList = mutableListOf<Notification>()
+        val olderList = mutableListOf<Notification>()
+
+        for (notif in notifs) {
+            when {
+                notif.timestamp >= todayStart -> todayList.add(notif)
+                notif.timestamp >= yesterdayStart -> yesterdayList.add(notif)
+                notif.timestamp >= weekStart -> last7DaysList.add(notif)
+                else -> olderList.add(notif)
+            }
+        }
+        return GroupedNotifications(todayList, yesterdayList, last7DaysList, olderList)
+    }
+
+    private suspend fun populateSenderUsernames(notifications: List<Notification>): List<Notification> {
+        return notifications.map { notif ->
+            try {
+                val senderMeta = supabase.from("users").select {
+                    filter { eq("id", notif.sender) }
+                }.decodeSingle<UserMetadata>()
+                //notif.senderUsername = senderMeta.username
+                notif.copy(senderUsername = senderMeta.username)
+            } catch (e: Exception) {
+                //notif.senderUsername = "Unknown"
+                notif.copy(senderUsername = "Unknown")
             }
         }
     }

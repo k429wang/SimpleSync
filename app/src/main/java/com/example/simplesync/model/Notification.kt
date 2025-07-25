@@ -5,6 +5,7 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.UUID
 
 @Serializable
@@ -15,5 +16,6 @@ data class Notification(
     @SerialName("sender_id") val sender: String, // User ID of notification sender
     @SerialName("event_id") val event: String?,
     @SerialName("is_read") val read: Boolean,
-    @Contextual @SerialName("created_at") val timestamp: Instant = Clock.System.now()
+    @Contextual @SerialName("created_at") val timestamp: Instant = Clock.System.now(),
+    @Transient var senderUsername: String? = null
 )

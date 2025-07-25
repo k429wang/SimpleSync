@@ -6,4 +6,4 @@ import kotlinx.serialization.Serializable
 @Serializable enum class Recurrence { ONCE, DAILY, WEEKLY }
 @Serializable enum class Visibility { SOLO, PRIVATE, PUBLIC }
 @Serializable enum class Status { PENDING, ACCEPTED, DECLINED }
-@Serializable enum class NotifType { FRIENDS, EVENT_INVITE, EVENT_ACCEPT, EVENT_DECLINE, EVENT_EDIT, EVENT_CANCEL }
+@Serializable enum class NotifType { FRIEND_REQUEST, FRIEND_ACCEPT, EVENT_INVITE, EVENT_ACCEPT, EVENT_DECLINE, EVENT_EDIT, EVENT_CANCEL }
