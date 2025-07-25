@@ -29,17 +29,33 @@ import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.ui.components.EventField
+import com.example.simplesync.ui.components.EventFormFields
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.FriendshipViewModel
 import com.example.simplesync.viewmodel.UserViewModel
+import kotlinx.datetime.Clock
 import kotlin.collections.set
 
 // Citation: built with ChatGPT 4o
 @Composable
 fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
+    // Clock
+    val clock: Clock = Clock.System
+    val now = clock.now()
+
     // Events
     val eventViewModel: EventViewModel = hiltViewModel()
+
+    // Form state (if user is owner or editor of this event)
+    var name by remember { mutableStateOf(event.name) }
+    var description by remember { mutableStateOf(event.description ?: "") }
+    var startTime by remember { mutableStateOf(event.startTime) }
+    var endTime by remember { mutableStateOf(event.endTime) }
+    var type by remember { mutableStateOf(event.type.name.lowercase().replaceFirstChar { it.uppercase() }) }
+    var location by remember { mutableStateOf(event.location ?: "") }
+    var recurrence by remember { mutableStateOf(event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() }) }
+    var visibility by remember { mutableStateOf(event.visibility.name.lowercase().replaceFirstChar { it.uppercase() }) }
 
     // User
     val userViewModel: UserViewModel = hiltViewModel()
@@ -55,6 +71,9 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     val attendees by eventViewModel.attendeesForEvent.collectAsState()
     val accepted = attendees.filter { it.inviteStatus == Status.ACCEPTED }
     val pending = attendees.filter { it.inviteStatus == Status.PENDING }
+
+    // User-specific attendee info
+    val userRole = attendees.find { it.userId == userId }?.role
 
     // Fill your availability
     var noteText by remember { mutableStateOf("") }
@@ -136,45 +155,74 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Event Details
-            DetailRow("Time:", formatEventTime(event))
-            DetailRow("Location:", event.location ?: "N/A")
-            DetailRow("Recurrence:", event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() })
-            DetailRow("Description:", event.description ?: "None")
-            DetailRow("Visibility:", event.visibility.name.lowercase().replaceFirstChar { it.uppercase() })
+            if(userRole == EventRole.OWNER || userRole == EventRole.EDITOR) {
+                // Show editable fields
+                EventFormFields(
+                    name = name,
+                    onNameChange = { name = it },
+                    description = description,
+                    onDescriptionChange = { description = it },
+                    startTime = startTime,
+                    onStartTimeChange = { startTime = it ?: now },
+                    endTime = endTime,
+                    onEndTimeChange = { endTime = it ?: now },
+                    type = type,
+                    onTypeChange = { type = it },
+                    location = location,
+                    onLocationChange = { location = it },
+                    recurrence = recurrence,
+                    onRecurrenceChange = { recurrence = it },
+                    visibility = visibility,
+                    onVisibilityChange = { visibility = it }
+                )
+            } else {
+                // Show readonly fields
+                DetailRow("Time:", formatEventTime(event))
+                DetailRow("Location:", event.location ?: "N/A")
+                DetailRow(
+                    "Recurrence:",
+                    event.recurrence.name.lowercase().replaceFirstChar { it.uppercase() })
+                DetailRow("Description:", event.description ?: "None")
+                DetailRow(
+                    "Visibility:",
+                    event.visibility.name.lowercase().replaceFirstChar { it.uppercase() })
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
             HorizontalDivider()
             Spacer(modifier = Modifier.height(8.dp))
 
             // Invite Friends Button
-            val openInviteDialog = remember { mutableStateOf(false) }
-            Button(
-                onClick = { openInviteDialog.value = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Invite Friends to This Event")
-            }
-            // Invite Friends Popup Dialog
-            if (openInviteDialog.value) {
-                AlertDialog(
-                    onDismissRequest = { openInviteDialog.value = false },
-                    title = { Text("Invite Friends") },
-                    confirmButton = {
-                        TextButton(onClick = { openInviteDialog.value = false }) {
-                            Text("Close")
+            if(userRole == EventRole.OWNER || userRole == EventRole.EDITOR) {
+                val openInviteDialog = remember { mutableStateOf(false) }
+                Button(
+                    onClick = { openInviteDialog.value = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Invite Friends to This Event")
+                }
+                // Invite Friends Popup Dialog
+                if (openInviteDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { openInviteDialog.value = false },
+                        title = { Text("Invite Friends") },
+                        confirmButton = {
+                            TextButton(onClick = { openInviteDialog.value = false }) {
+                                Text("Close")
+                            }
+                        },
+                        text = {
+                            InviteDialogContent(
+                                event = event,
+                                userId = userId ?: "",
+                                eventViewModel = eventViewModel,
+                                userViewModel = userViewModel,
+                                friendshipViewModel = friendshipViewModel,
+                                friendsCache = friendsCache
+                            )
                         }
-                    },
-                    text = {
-                        InviteDialogContent(
-                            event = event,
-                            userId = userId ?: "",
-                            eventViewModel = eventViewModel,
-                            userViewModel = userViewModel,
-                            friendshipViewModel = friendshipViewModel,
-                            friendsCache = friendsCache
-                        )
-                    }
-                )
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -200,7 +248,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                         AttendeeListItem(
                             metadata = user,
                             role = attendee.role,
-                            showDeleteButton = event.owner == userId && attendee.userId != userId,
+                            showDeleteButton = (userRole == EventRole.OWNER) && (attendee.userId != userId),
                             onDelete = {
                                 // Call delete from eventViewModel
                                 eventViewModel.removeAttendee(event.id, attendee.userId)
@@ -233,7 +281,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                         AttendeeListItem(
                             metadata = user,
                             role = attendee.role,
-                            showDeleteButton = event.owner == userId,
+                            showDeleteButton = userRole == EventRole.OWNER,
                             onDelete = {
                                 // Call delete from eventViewModel
                                 eventViewModel.removeAttendee(event.id, attendee.userId)
