@@ -14,13 +14,13 @@ fun DropdownField(
     label: String,
     options: List<String>,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .padding(vertical = 2.dp)
             .height(50.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -29,7 +29,7 @@ fun DropdownField(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(fontSize = 15.sp, fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .width(100.dp)
+                .width(100.dp) // Matches EventField
                 .padding(end = 4.dp)
         )
 
@@ -37,8 +37,7 @@ fun DropdownField(
             OutlinedTextField(
                 value = value,
                 onValueChange = {},
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 singleLine = true,
                 trailingIcon = {

@@ -1,6 +1,6 @@
 package com.example.simplesync.ui.pages
 
-import DropdownField
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,10 +18,9 @@ import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.ui.components.BottomNavBar
-import com.example.simplesync.ui.components.DateTimePickerField
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.ui.components.ScreenTitle
-import com.example.simplesync.ui.components.EventField
+import com.example.simplesync.ui.components.EventFormFields
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -33,11 +32,6 @@ fun NewEventPage(
     eventViewModel: EventViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel()
 ) {
-    // Enums to display in dropdowns
-    val typeOptions = listOf<String>("IRL", "Virtual")
-    val recurrenceOptions = listOf<String>("Once", "Daily", "Weekly")
-    val visibilityOptions = listOf<String>("Solo", "Private", "Public")
-
     // Event parameters sent to backend
     val currUser by userViewModel.currUser.collectAsState()
     var name by remember { mutableStateOf("") }
@@ -57,16 +51,17 @@ fun NewEventPage(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Popup for event creation results
-    LaunchedEffect (createEventResult) {
-        createEventResult?.let {
-            it.onSuccess {
+    // Handle createEventResult
+    LaunchedEffect(createEventResult) {
+        createEventResult?.let { result ->
+            result.onSuccess { event ->
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
-                navController.nav(navController.EVENTS) // TODO: Update to navigate to the created event's page
+                // Navigate using the actual event
+                navController.nav(navController.eventDetailsRoute(event.id))
             }.onFailure { e ->
-                print("ERROR: ${e.message}")
+                Log.e("NewEventPage", "Event creation failed", e)
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Error: ${e.message}")
                 }
@@ -75,7 +70,8 @@ fun NewEventPage(
     }
 
     Scaffold(
-        bottomBar = { BottomNavBar(navController) }
+        bottomBar = { BottomNavBar(navController) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -132,66 +128,50 @@ fun NewEventPage(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Fields that will be synced with the backend
-            EventField("Name:", name, {name = it})
-            EventField("Description:", description, {description = it})
-
-            DateTimePickerField("Start Time", startTime) {
-                startTime = it
-            }
-            DateTimePickerField("End Time", endTime) {
-                endTime = it
-            }
-
-            DropdownField(
-                label = "Type:",
-                options = typeOptions,
-                value = type,
-                onValueChange = {type = it}
-            )
-            EventField("Location:", location, {location = it})
-            DropdownField(
-                label = "Recurrence:",
-                options = recurrenceOptions,
-                value = recurrence,
-                onValueChange = {recurrence = it}
-            )
-            DropdownField(
-                label = "Visibility:",
-                options = visibilityOptions,
-                value = visibility,
-                onValueChange = {visibility = it}
+            EventFormFields(
+                name = name,
+                onNameChange = { name = it },
+                description = description,
+                onDescriptionChange = { description = it },
+                startTime = startTime,
+                onStartTimeChange = { startTime = it },
+                endTime = endTime,
+                onEndTimeChange = { endTime = it },
+                type = type,
+                onTypeChange = { type = it },
+                location = location,
+                onLocationChange = { location = it },
+                recurrence = recurrence,
+                onRecurrenceChange = { recurrence = it },
+                visibility = visibility,
+                onVisibilityChange = { visibility = it }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Create event button, should send you to the Event's page
+            // Form submission button
             Button(
                 onClick = {
                     try {
                         handleCreateNewEvent(
-                            eventViewModel,
-                            currUser?.authUser?.id,
-                            name,
-                            description,
-                            startTime,
-                            endTime,
-                            type,
-                            location,
-                            recurrence,
-                            visibility,
+                            eventViewModel = eventViewModel,
+                            owner = currUser?.userMetadata?.id,
+                            name = name,
+                            description = description,
+                            startTime = startTime,
+                            endTime = endTime,
+                            type = type,
+                            location = location,
+                            recurrence = recurrence,
+                            visibility = visibility
                         )
                     } catch (e: Exception) {
                         coroutineScope.launch {
-                            snackbarHostState.showSnackbar("Invalid input: ${e.message}")
+                            snackbarHostState.showSnackbar("Error: ${e.message}")
                         }
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(44.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Create Event", color = Color.White)
+                Text("Create Event")
             }
         }
     }
