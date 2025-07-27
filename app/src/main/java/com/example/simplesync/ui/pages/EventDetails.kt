@@ -94,13 +94,15 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             userViewModel.fetchUserMetadataById(event.owner) { ownerMetadata = it }
         }
 
-        // Current user-dependent logic
+        eventViewModel.fetchAttendeesForEvent(event.id)
+    }
+
+    LaunchedEffect(userId) {
         if (userId != null) {
             friendshipViewModel.fetchFriendshipsForUser(userId)
         }
-
-        eventViewModel.fetchAttendeesForEvent(event.id)
     }
+
 
 
     LaunchedEffect(eventResult) {
@@ -499,7 +501,6 @@ fun InviteFriendsSection(
     attendees: List<Attendee>
 ) {
     val invitedUsers = remember { mutableStateListOf<String>() }
-
     // Skip friends who are already invited (pending) or accepted
     val alreadyInvolvedIds = attendees.map { it.userId }.toSet()
     val inviteableFriendships = friendships
