@@ -19,7 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.viewmodel.ExternalCalendarViewModel
-
+import com.example.simplesync.viewmodel.EventViewModel
+import com.example.simplesync.viewmodel.UserViewModel
+import com.example.simplesync.model.Event
+import com.example.simplesync.model.EventType
+import com.example.simplesync.model.Recurrence
+import com.example.simplesync.model.Visibility
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 
@@ -27,6 +32,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
+
+import biweekly.Biweekly
+import kotlinx.datetime.Instant
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun LaunchGoogleSignIn(calendarViewModel: ExternalCalendarViewModel) {
@@ -64,19 +76,72 @@ fun LaunchGoogleSignIn(calendarViewModel: ExternalCalendarViewModel) {
 }
 
 @Composable
-fun UploadICSFile(uploadedFileName: androidx.compose.runtime.MutableState<String>) {
+fun UploadICSFile(
+    uploadedFileName: androidx.compose.runtime.MutableState<String>,
+    eventViewModel: EventViewModel,
+    currUserId: String?
+) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        if (uri != null) {
+        if (uri != null && currUserId != null) {
             val name = uri.lastPathSegment?.substringAfterLast("/") ?: "Selected File"
             uploadedFileName.value = name
 
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val fileContent = inputStream?.bufferedReader()?.use { it.readText() }
-            Log.d("ICS File", "Content: $fileContent")
+            coroutineScope.launch {
+                // Fetch latest events for user before checking for duplicates
+                eventViewModel.fetchEventsForUser(currUserId)
+
+                // Read the file after fetching events
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val fileContent = inputStream?.bufferedReader()?.use { it.readText() }
+                Log.d("ICS File", "Content: $fileContent")
+
+                if (!fileContent.isNullOrBlank()) {
+                    val ical = Biweekly.parse(fileContent).first()
+
+                    for (vevent in ical.events) {
+                        val uid = vevent.uid?.value
+                        val summary = vevent.summary?.value ?: "(No title)"
+                        val description = vevent.description?.value
+                        val location = vevent.location?.value
+
+                        val startDate = vevent.dateStart?.value
+                        val endDate = vevent.dateEnd?.value
+                        val startTime = startDate?.let { Instant.fromEpochMilliseconds(it.time) }
+                        val endTime = endDate?.let { Instant.fromEpochMilliseconds(it.time) }
+
+                        if (startTime == null || endTime == null) {
+                            Log.d("ICS Import", "Skipped event (missing times): $summary")
+                            continue
+                        }
+
+                        val appEvent = Event(
+                            owner = currUserId,
+                            name = summary,
+                            description = description,
+                            startTime = startTime,
+                            endTime = endTime,
+                            type = EventType.VIRTUAL,
+                            location = location,
+                            recurrence = Recurrence.ONCE,
+                            visibility = Visibility.PUBLIC,
+                            externalId = uid
+                        )
+
+                        // Use only the up-to-date duplicate check
+                        if (uid == null || !eventViewModel.isDuplicateEvent(uid)) {
+                            eventViewModel.createEvent(appEvent)
+                            Log.d("ICS Import", "Created event: $summary ($uid)")
+                        } else {
+                            Log.d("ICS Import", "Skipped duplicate: $summary ($uid)")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -133,10 +198,6 @@ fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val context = LocalContext.current
-//                        val account = GoogleSignIn.getLastSignedInAccount(context)
-//                        val googleAccount = remember {
-//                            mutableStateOf(account?.email ?: "Not synced")
-//                        }
                         val outlookAccount = remember { mutableStateOf("Not synced") }
                         val uploadedFileName = remember { mutableStateOf("No file uploaded") }
 
@@ -151,23 +212,12 @@ fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
                         )
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(64.dp))
+                        val eventViewModel: EventViewModel = hiltViewModel()
+                        val userViewModel: UserViewModel = hiltViewModel()
+                        val currUser by userViewModel.currUser.collectAsState()
+                        val currUserId = currUser?.authUser?.id
 
-                        Button(
-                            onClick = { /* TODO: Implement Outlook Calendar sign-in */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Sign in with Outlook", color = Color.White)
-                        }
-                        Text(
-                            text = "Current: ${outlookAccount.value}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(64.dp))
-
-                        UploadICSFile(uploadedFileName)
+                        UploadICSFile(uploadedFileName, eventViewModel, currUserId)
                         Text(
                             text = "Current: ${uploadedFileName.value}",
                             style = MaterialTheme.typography.bodySmall,
