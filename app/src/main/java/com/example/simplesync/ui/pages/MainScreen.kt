@@ -12,7 +12,6 @@ import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import com.example.simplesync.viewmodel.SignInViewModel
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
     signInViewModel: SignInViewModel = hiltViewModel(),

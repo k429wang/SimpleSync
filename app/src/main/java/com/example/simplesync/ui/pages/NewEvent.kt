@@ -33,9 +33,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toKotlinLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import java.time.LocalDateTime
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewEventPage(
     navController: SimpleSyncNavController,
@@ -203,10 +203,10 @@ fun handleCreateNewEvent(
     if (owner.isNullOrBlank()) throw IllegalStateException("User not signed in")
     if (startTime == null) throw IllegalStateException("Start time not provided")
     if (endTime == null) throw IllegalStateException("Start time not provided")
-    if (endTime <= startTime) throw IllegalStateException("End Time must be after Start Time")
+    if (endTime <= startTime) throw IllegalStateException("End time must be after start time")
     // other error checks we should perform:
-    // Events should be within the same day, [unless some caveat]
-    //
+    val timeZone = TimeZone.currentSystemDefault()
+    if (endTime.toLocalDateTime(timeZone).date != startTime.toLocalDateTime(timeZone).date) throw IllegalStateException("Start and end times must be on same day")
 
     // Create a new event
     val event = Event(
@@ -237,5 +237,6 @@ fun handleCreateNewEvent(
 
     // Insert the event into Supabase
     eventViewModel.createEvent(event)
+    // navigate out
 }
 

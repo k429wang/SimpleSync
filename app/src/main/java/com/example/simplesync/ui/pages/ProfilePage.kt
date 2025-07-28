@@ -31,7 +31,6 @@ import com.example.simplesync.viewmodel.EventViewModel
 
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileScreen(
     navController: SimpleSyncNavController,

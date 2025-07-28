@@ -239,7 +239,7 @@ private fun timeSlotRow (
                         if (strategy == "NEW"){
                             if (flag) {
                                 Log.d("CAL", "Calling NavController")
-                                navController.nav(navController.NEW_EVENT)
+                                navController.bottomButtonNav(navController.NEW_EVENT)
                                 // return is null now
                             } else {
                                 // navigate to specific event this refers to
