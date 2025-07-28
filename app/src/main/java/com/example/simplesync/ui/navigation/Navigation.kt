@@ -20,7 +20,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.example.simplesync.ui.pages.EventPage
 import com.example.simplesync.ui.pages.ExternalCalendarSyncPage
-import com.example.simplesync.ui.pages.HomePage
 import com.example.simplesync.ui.pages.NewEventPage
 import com.example.simplesync.ui.pages.ProfileScreen
 import com.example.simplesync.ui.pages.SearchPage
@@ -57,16 +56,13 @@ fun rememberSimpleSyncNavController(
     SimpleSyncNavController(navController)
 }
 
-// navigateUp is probably too complex for us to really need.
-
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SimpleSyncAppNav(
     modifier: Modifier = Modifier,
     navController: SimpleSyncNavController,
     // If we want to pass data between UI screens, use this.
     //viewModel: AppViewModel,
-    startDestination: String = "HOME"
+    startDestination: String = "EVENTS"
 ){
     NavHost(
         modifier = modifier,
@@ -82,16 +78,8 @@ fun SimpleSyncAppNav(
             ExitTransition.None
         }
     ) {
-        // we might use a viewmodel, we might not, not sure.
-        // This is sample, do not call.
-        composable(navController.PAGE_TO_GO_TO) {
-            //PageFunction(navController)//,viewModel)
-        }
         composable(navController.SIGN_IN) {
             SignIn(navController)
-        }
-        composable(navController.HOME) {
-            HomePage(navController)
         }
         composable(navController.EVENTS) {
             EventPage(navController)
@@ -156,15 +144,12 @@ class SimpleSyncNavController(
     // no dedicated home?
     val SIGN_UP = "SIGN_UP"
     val SIGN_IN = "SIGN_IN"
-    val HOME = "HOME"
-    val CALENDAR = "CALENDAR"
     val EVENTS = "EVENTS"
     val NEW_EVENT = "NEW_EVENT"
     val SETTINGS = "SETTINGS"
     val SEARCH = "SEARCH"
     val PROFILE = "PROFILE"
     val MY_ACCOUNT = "MY_ACCOUNT"
-    val PAGE_TO_GO_TO = "PAGE_TO_GO_TO"
     val EXTERNAL_SIGN_IN = "EXTERNAL_SIGN_IN"
     val FRIENDS = "FRIENDS"
     val NOTIFICATIONS = "NOTIFICATIONS"
@@ -178,6 +163,7 @@ class SimpleSyncNavController(
 
     fun bottomButtonNav( route:String ){
         if (route != navController.currentDestination?.route){
+            Log.d("nav", "Scaffold nav to $route")
             navController.navigate(route) {
                 launchSingleTop = true
                 restoreState = true
