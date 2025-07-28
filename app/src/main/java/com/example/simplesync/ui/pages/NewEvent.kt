@@ -1,6 +1,9 @@
 package com.example.simplesync.ui.pages
 
 import DropdownField
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -13,10 +16,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.simplesync.model.ConcreteCalendar
 import com.example.simplesync.model.Event
 import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Visibility
+import com.example.simplesync.ui.components.AvailabilityGrid
 import com.example.simplesync.ui.components.BottomNavBar
 import com.example.simplesync.ui.components.DateTimePickerField
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
@@ -26,7 +31,12 @@ import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toKotlinLocalDateTime
+import java.time.LocalDateTime
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewEventPage(
     navController: SimpleSyncNavController,
@@ -48,6 +58,7 @@ fun NewEventPage(
     var location by remember { mutableStateOf("") }
     var recurrence by remember { mutableStateOf("") }
     var visibility by remember { mutableStateOf("") }
+    var availabilityReturn by remember { mutableStateOf<LocalDateTime?>( null ) }
 
     // Keep track of scroll position
     val scrollState = rememberScrollState()
@@ -57,7 +68,12 @@ fun NewEventPage(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // for instant conversion
+    val timeZone = TimeZone.currentSystemDefault()
+
     // Popup for event creation results
+    // This is creating some issues for nav. Rather than doing the nav
+    // here, maybe move it to the event creation onclick & error check?
     LaunchedEffect (createEventResult) {
         createEventResult?.let {
             it.onSuccess {
@@ -96,38 +112,32 @@ fun NewEventPage(
             // PLACE HOLDER FOR CALENDAR!!!!!!
             // TODO: update with working calendar
 
-            // Header Row for Days
-            Row(modifier = Modifier.fillMaxWidth()) {
-                val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-                days.forEach {
-                    Text(
-                        text = it,
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(2.dp),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
+            availabilityReturn = AvailabilityGrid(
+                navController = navController,
+                calendar = ConcreteCalendar(),
+                strategy = "RETURN"
+            )
 
-            // Availability boxes
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                repeat(7) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .padding(2.dp)
-                            .background(Color.LightGray)
-                            .border(1.dp, Color.Black)
-                    )
+            // logic for clicking the thing.
+            // This isn't a composable. If it were, it would recompose.
+            //Try to do an if statement that modifies the value with the onclick
+            // again, quick and dirty but it works
+            val availInstant = availabilityReturn?.toKotlinLocalDateTime()?.toInstant(timeZone = timeZone)
+            if (availInstant != null ) {
+                if (startTime == null) {
+                    startTime = availInstant
+                } else if (endTime == null) {
+                    if (startTime != availInstant) {
+                        endTime = availInstant
+                    }
+                } else {
+                    if (startTime!! >= availInstant) {
+                        startTime = availInstant
+                    } else {
+                        endTime = availInstant
+                    }
                 }
-            }
+            } // this should work fine now.
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -213,6 +223,10 @@ fun handleCreateNewEvent(
     if (owner.isNullOrBlank()) throw IllegalStateException("User not signed in")
     if (startTime == null) throw IllegalStateException("Start time not provided")
     if (endTime == null) throw IllegalStateException("Start time not provided")
+    if (endTime <= startTime) throw IllegalStateException("End Time must be after Start Time")
+    // other error checks we should perform:
+    // Events should be within the same day, [unless some caveat]
+    //
 
     // Create a new event
     val event = Event(
