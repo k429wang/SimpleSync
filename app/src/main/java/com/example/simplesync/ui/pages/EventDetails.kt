@@ -53,7 +53,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     val eventViewModel: EventViewModel = hiltViewModel()
 
     // Notifs
-    val notifViewModel: NotificationViewModel = hiltViewModel()
+    val notificationViewModel: NotificationViewModel = hiltViewModel()
 
     // Baseline copy that will change after each successful save
     var savedEvent by remember { mutableStateOf(event) }
@@ -300,7 +300,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                                 eventViewModel = eventViewModel,
                                 userViewModel = userViewModel,
                                 friendshipViewModel = friendshipViewModel,
-                                notifViewModel = notifViewModel,
+                                notificationViewModel = notificationViewModel,
                                 friendsCache = friendsCache
                             )
                         }
@@ -477,7 +477,7 @@ fun InviteDialogContent(
     eventViewModel: EventViewModel,
     userViewModel: UserViewModel,
     friendshipViewModel: FriendshipViewModel,
-    notifViewModel: NotificationViewModel,
+    notificationViewModel: NotificationViewModel,
     friendsCache: MutableMap<String, UserMetadata?>
 ) {
     val attendees by eventViewModel.attendeesForEvent.collectAsState()
@@ -491,7 +491,7 @@ fun InviteDialogContent(
         friendsCache = friendsCache,
         userViewModel = userViewModel,
         eventViewModel = eventViewModel,
-        notifViewModel = notifViewModel,
+        notificationViewModel = notificationViewModel,
         attendees = attendees,
     )
 
@@ -506,7 +506,7 @@ fun InviteFriendsSection(
     friendsCache: MutableMap<String, UserMetadata?>,
     userViewModel: UserViewModel,
     eventViewModel: EventViewModel,
-    notifViewModel: NotificationViewModel,
+    notificationViewModel: NotificationViewModel,
     attendees: List<Attendee>
 ) {
     val invitedUsers = remember { mutableStateListOf<String>() }
@@ -551,7 +551,7 @@ fun InviteFriendsSection(
                                 role = EventRole.EDITOR,
                             )
                             invitedUsers.add(friend.id)
-                            notifViewModel.insertNotif(
+                            notificationViewModel.insertNotif(
                                 type = NotifType.EVENT_INVITE,
                                 receiver = friend.id,
                                 sender = userId,
