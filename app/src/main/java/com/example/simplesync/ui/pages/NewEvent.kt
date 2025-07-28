@@ -69,13 +69,13 @@ fun NewEventPage(
     // This is creating some issues for nav. Rather than doing the nav
     // here, maybe move it to the event creation onclick & error check?
     LaunchedEffect (createEventResult) {
-        createEventResult?.let {
+        createEventResult?.let { it ->
             it.onSuccess {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
                 // Navigate using the actual event
-                navController.nav(navController.eventDetailsRoute(event.id))
+                navController.nav(navController.eventDetailsRoute(it.id))
             }.onFailure { e ->
                 Log.e("NewEventPage", "Event creation failed", e)
                 coroutineScope.launch {
