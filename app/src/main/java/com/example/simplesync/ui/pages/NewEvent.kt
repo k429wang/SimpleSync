@@ -75,8 +75,7 @@ fun NewEventPage(
                     snackbarHostState.showSnackbar("Successfully created event!")
                 }
                 // Navigate using the actual event
-                // This is janky, so we'll just not nav away. It would be nice, but it's broken.
-                //navController.nav(navController.eventDetailsRoute(it.id))
+                navController.nav(navController.eventDetailsRoute(it.id))
             }.onFailure { e ->
                 Log.e("NewEventPage", "Event creation failed", e)
                 coroutineScope.launch {
