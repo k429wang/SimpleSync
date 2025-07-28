@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import org.json.JSONObject
 import com.example.simplesync.BuildConfig
+import com.example.simplesync.model.NotifType
 import com.example.simplesync.model.UserMetadata
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +45,10 @@ class NotificationViewModel @Inject constructor(
     private val _notifications =
         MutableStateFlow(GroupedNotifications(emptyList(), emptyList(), emptyList(), emptyList()))
     val notifications: StateFlow<GroupedNotifications> = _notifications // GroupedNotifications
+
+    // Track if notifications have been loaded
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
     suspend fun sendNotificationToUser(playerId: String?, message: String): Boolean {
         return try {
@@ -112,11 +117,8 @@ class NotificationViewModel @Inject constructor(
 
     fun fetchNotifsForUser(userId: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             try {
-//                val fetched = supabase.from(NOTIFS_TABLE)
-//                    .select("*, sender_id(first_name)")
-//                    .eq("user_id", userId)
-//                    .decodeList<Notification>()
                 val fetched = supabase.from(NOTIFS_TABLE).select {
                     filter {
                         eq("user_id", userId)
@@ -127,6 +129,26 @@ class NotificationViewModel @Inject constructor(
                 _notifications.value = groupNotifications(populateSenderInfo(fetched))
             } catch (e: Exception) {
                 Log.e("NotificationViewModel", "Failed to fetch notifications", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun insertNotif(type: NotifType, receiver: String, sender: String, eventId:String? = null) {
+        viewModelScope.launch {
+            try {
+                supabase.from(NOTIFS_TABLE).insert(
+                    Notification(
+                        type = type,
+                        receiver = receiver,
+                        sender = sender,
+                        event = eventId,
+                        read = false
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e("NotificationViewModel", "Failed to insert notifications", e)
             }
         }
     }
@@ -151,7 +173,12 @@ class NotificationViewModel @Inject constructor(
                 else -> olderList.add(notif)
             }
         }
-        return GroupedNotifications(todayList, yesterdayList, last7DaysList, olderList)
+        return GroupedNotifications(
+            today = todayList.sortedByDescending { it.timestamp },
+            yesterday = yesterdayList.sortedByDescending { it.timestamp },
+            last7Days = last7DaysList.sortedByDescending { it.timestamp },
+            older = olderList.sortedByDescending { it.timestamp }
+        )
     }
 
     private suspend fun populateSenderInfo(notifications: List<Notification>): List<Notification> {

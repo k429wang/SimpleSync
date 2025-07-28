@@ -35,18 +35,19 @@ fun NotificationsPage(navController: SimpleSyncNavController? = null) {
     val currUser by userViewModel.currUser.collectAsState()
     val groupedNotifs by notificationViewModel.notifications.collectAsState()
     var metadata by remember { mutableStateOf<UserMetadata?>(null) }
+    val isLoading by notificationViewModel.isLoading.collectAsState()
 
-    LaunchedEffect(true) {
-        Log.d("NOTIF", "currUser is $currUser")
+    LaunchedEffect(currUser) {
+        if (currUser == null) {
+            // Don't do anything yet; wait until it's settled
+            return@LaunchedEffect
+        }
+
         currUser?.let {
             Log.d("NOTIF", "fetching notifs for ${it.authUser.id}")
             notificationViewModel.fetchNotifsForUser(it.authUser.id)
-        }
-    }
-    LaunchedEffect(currUser) {
-        currUser?.let {
-            userViewModel.fetchUserMetadataById(it.authUser.id) {
-                metadata = it
+            userViewModel.fetchUserMetadataById(it.authUser.id) { meta ->
+                metadata = meta
             }
         }
     }
@@ -71,7 +72,9 @@ fun NotificationsPage(navController: SimpleSyncNavController? = null) {
                     && groupedNotifs.yesterday.isEmpty()
                     && groupedNotifs.last7Days.isEmpty()
                     && groupedNotifs.older.isEmpty()
-            if (isEmpty) {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else if (isEmpty) {
                 Text(
                     text = "No notifications to show.",
                     color = Color.Gray,
@@ -108,6 +111,7 @@ fun NotificationSection(title: String, notifs: List<Notification>) {
                     NotifType.EVENT_CANCEL -> "cancelled the event"
                     NotifType.FRIEND_REQUEST -> "requested to be your friend"
                     NotifType.FRIEND_ACCEPT -> "accepted your friend request"
+                    NotifType.FRIEND_DECLINE -> "declined your friend request"
                 },
                 date = notif.timestamp.toString().substringBefore("T") // Simplified date
             )
