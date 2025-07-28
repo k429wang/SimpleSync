@@ -1,10 +1,7 @@
 package com.example.simplesync.ui.pages
 
 import android.util.Log
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,13 +15,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.compose.AsyncImage
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.model.Notification
 import com.example.simplesync.model.*
@@ -113,7 +107,7 @@ fun NotificationItem(senderName: String, senderPfpUrl: String?, message: String,
     Row(modifier = Modifier.padding(vertical = 8.dp)) {
         ReadOnlyProfilePicture(
                 imageUrl = senderPfpUrl,
-                size = 40.dp
+                size = 48.dp
         )
         Spacer(modifier = Modifier.width(12.dp))
 

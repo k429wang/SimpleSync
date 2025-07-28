@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -436,20 +435,11 @@ fun FriendListItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // User Icon
-        if (pfpUrl != "") {
-            ReadOnlyProfilePicture(
-                imageUrl = pfpUrl,
-                size = 48.dp,
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(end = 12.dp)
-            )
-        }
+        ReadOnlyProfilePicture(
+            imageUrl = pfpUrl,
+            size = 48.dp,
+        )
+        Spacer(modifier = Modifier.width(6.dp))
 
         // Name + Username
         Column(
