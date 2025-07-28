@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.Lock
@@ -24,12 +23,9 @@ import com.example.simplesync.ui.components.ScreenTitle
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.model.Event
 import com.example.simplesync.model.Visibility
-import com.example.simplesync.model.Recurrence
-import com.example.simplesync.model.*
 import com.example.simplesync.ui.components.SearchBar
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.UserViewModel
-import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,36 +42,8 @@ fun EventPage(navController: SimpleSyncNavController) {
     LaunchedEffect(currUser) {
         currUser?.let {
             eventViewModel.fetchEventsForUser(it.authUser.id)
-            // TODO: Currently only fetches owned events.
-            //  Do we want to show invited/accepted events too?
         }
     }
-
-    // Sample data
-    val sampleEvents = listOf(
-        Event(
-            owner = "alexj",
-            name = "Guild Raid Planning",
-            description = "Sync availability for weekend event",
-            startTime = Instant.parse("2025-08-01T15:30:00Z"),
-            endTime = Instant.parse("2025-08-01T17:00:00Z"),
-            type = EventType.VIRTUAL,
-            location = "Discord",
-            recurrence = Recurrence.ONCE,
-            visibility = Visibility.PRIVATE
-        ),
-        Event(
-            owner = "marial",
-            name = "Study Group",
-            description = "Weekly meeting for study sync",
-            startTime = Instant.parse("2025-07-09T09:30:00Z"),
-            endTime = Instant.parse("2025-07-09T12:00:00Z"),
-            type = EventType.IRL,
-            location = "Library",
-            recurrence = Recurrence.WEEKLY,
-            visibility = Visibility.PUBLIC
-        )
-    )
 
     Scaffold(
         bottomBar = { BottomNavBar(navController) }
