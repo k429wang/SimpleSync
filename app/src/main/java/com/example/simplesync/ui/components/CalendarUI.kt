@@ -6,7 +6,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.simplesync.model.AbstractCalendar
 import com.example.simplesync.model.ConcreteCalendar
-import com.example.simplesync.model.DailyTimeSlot
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +25,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.simplesync.model.OnceTimeSlot
+import com.example.simplesync.model.DailyTimeSlot
+import com.example.simplesync.model.WeeklyTimeSlot
+import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.TimeBlock
 import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import com.example.simplesync.viewmodel.EventViewModel
@@ -38,16 +41,16 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 // Composable for the availability grid
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AvailabilityGrid(
     navController: SimpleSyncNavController,
     calendar: AbstractCalendar,
     modifier: Modifier = Modifier,
+    strategy : String = "NEW",
     startHour: Int = 8,
     endHour: Int = 20,
     slotDuration: Int = 30
-) {
+) : LocalDateTime? {
     // this needs requiresAPI calls. I want to update to not use this, ideally.
     // problem for future me.
     val eventViewModel: EventViewModel = hiltViewModel()
@@ -56,6 +59,8 @@ fun AvailabilityGrid(
     val events by eventViewModel.events.collectAsState()
 
     var baseCalendar = remember {calendar}
+    // I don't think we actually want this to be a remember at this part.
+    var returnTime by remember { mutableStateOf<LocalDateTime?>( null ) }
 
     // for each owned event, add it to our calendar.
     // This isn't like, efficient, but it's good for demo purposes.
@@ -70,11 +75,25 @@ fun AvailabilityGrid(
         for (event in events) {
             val st = event.startTime.toLocalDateTime(timeZone)
             val et = event.endTime.toLocalDateTime(timeZone)
-            result = DailyTimeSlot(
-                decorating = result,
-                startTime = LocalDateTime.of(st.year, st.month, st.dayOfMonth, st.hour, st.minute),
-                endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
-            )
+            if (event.recurrence == Recurrence.DAILY) {
+                result = DailyTimeSlot(
+                    decorating = result,
+                    startTime = LocalDateTime.of(st.year, st.month,st.dayOfMonth, st.hour, st.minute),
+                    endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
+                )
+            } else if (event.recurrence == Recurrence.WEEKLY ){
+                result = WeeklyTimeSlot(
+                    decorating = result,
+                    startTime = LocalDateTime.of(st.year, st.month,st.dayOfMonth, st.hour, st.minute),
+                    endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
+                )
+            } else if (event.recurrence == Recurrence.ONCE ){
+                result = OnceTimeSlot(
+                    decorating = result,
+                    startTime = LocalDateTime.of(st.year, st.month,st.dayOfMonth, st.hour, st.minute),
+                    endTime = LocalDateTime.of(et.year, et.month, et.dayOfMonth, et.hour, et.minute)
+                )
+            }
             Log.d("CAL", event.toString())
         }
         Log.d("CAL", events.toString())
@@ -86,6 +105,7 @@ fun AvailabilityGrid(
             eventViewModel.fetchEventsForUser(it.authUser.id)
             // TODO: Currently only fetches owned events.
             //  Do we want to show invited/accepted events too?
+            // yes, but give me a second
         }
     }
 
@@ -96,7 +116,6 @@ fun AvailabilityGrid(
     val timeSlots : MutableList<LocalTime> = remember { mutableListOf() }
     // the passed value is vestigial - remove at some point
     //val availabilityData : MutableState<MutableList<TimeBlock>> = remember {mutableStateOf(decoratedCalendar.getAvailability(today.atTime(0,0)))}
-
 
     //
     Column(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
@@ -123,25 +142,29 @@ fun AvailabilityGrid(
             verticalArrangement = Arrangement.spacedBy(2.dp)
 
         ) {
-            // we really only need a single small for loop to generate it, not a funciton.
+            // we really only need a single small for loop to generate it, not a function.
+            timeSlots.clear() // because of the remember
             for (minutes in 60*startHour .. 60*endHour step slotDuration){
                 timeSlots.add(LocalTime.of(minutes/60, minutes%60))
             }
 
+            Log.d("CAL", "$timeSlots")
+
             items(timeSlots) { slot ->
-                TimeSlotRow(
+                returnTime = timeSlotRow(
                     navController = navController,
                     timeSlot = slot,
                     days = days,
                     availabilityData = decoratedCalendar.getAvailability(today.atTime(0,0)),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    strategy = strategy
                 )
             }
         }
     }
+    return returnTime
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun DayHeader(day: LocalDate, modifier: Modifier = Modifier) {
     val formatter = remember { DateTimeFormatter.ofPattern("EEE") }
@@ -162,15 +185,16 @@ private fun DayHeader(day: LocalDate, modifier: Modifier = Modifier) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun TimeSlotRow(
+private fun timeSlotRow (
     navController: SimpleSyncNavController,
     timeSlot: LocalTime,
     days: List<LocalDate>,
     availabilityData: MutableList<TimeBlock>,
-    modifier: Modifier = Modifier
-) {
+    modifier: Modifier = Modifier,
+    strategy: String
+    ): LocalDateTime? {
+    var returnTime by remember { mutableStateOf<LocalDateTime?>( null ) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -184,10 +208,12 @@ private fun TimeSlotRow(
 
         // Time slot cells
         days.forEach { day ->
+            val slotTime = LocalDateTime.of(day, timeSlot)
+
             var flag = true
             availabilityData.forEach{ block ->
                 // if this is true, then the block is within an availability zone, should be red
-                if (timeSlot >= block.startTime.toLocalTime() && timeSlot <= block.endTime.toLocalTime()){
+                if (slotTime >= block.startTime && slotTime < block.endTime){
                     flag = false
                 }
             }
@@ -210,12 +236,20 @@ private fun TimeSlotRow(
                         // do something! Redirect to a page to add
                         // an event, or modify that event.
                         Log.d("CAL","Flag is set to: $flag")
-                        if (flag) {
-                            Log.d("CAL", "Calling NavController")
-                            navController.nav(navController.NEW_EVENT)
-                        } else {
-                            // navigate to specific event this refers to
-                        }
+                        if (strategy == "NEW"){
+                            if (flag) {
+                                Log.d("CAL", "Calling NavController")
+                                navController.nav(navController.NEW_EVENT)
+                                // return is null now
+                            } else {
+                                // navigate to specific event this refers to
+                            }
+                        } else if (strategy == "RETURN")
+                            if (flag) {
+                                returnTime = LocalDateTime.of(day, timeSlot)
+                            } else {
+                                returnTime = LocalDateTime.of(day, timeSlot)
+                            }
                     }
 
             ) {
@@ -223,10 +257,10 @@ private fun TimeSlotRow(
             }
         }
     }
+    return returnTime
 }
 
 // Usage Example
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CalendarApp(
     navController: SimpleSyncNavController
