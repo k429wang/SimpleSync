@@ -8,6 +8,9 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import com.example.simplesync.util.createNotification
+import com.example.simplesync.model.NotifType
+import com.example.simplesync.model.Status
 
 const val FRIENDS_TABLE = "friendships"
 
@@ -48,6 +51,15 @@ class FriendshipViewModel @Inject constructor(
     suspend fun createFriendship(friendship: Friendship): Result<Boolean> {
         return try {
                 supabase.from(FRIENDS_TABLE).insert(friendship)
+
+                // Insert friend request to notification table
+                createNotification(
+                    supabase = supabase,
+                    receiver = friendship.friendId,
+                    sender = friendship.userId,
+                    type = NotifType.FRIEND_REQUEST
+                )
+
                 fetchFriendshipsForUser(friendship.userId) // Pull updated friends
                 Result.success(true)
             } catch (e: Exception) {
@@ -64,6 +76,22 @@ class FriendshipViewModel @Inject constructor(
                     eq("friend_id", friendship.friendId)
                 }
             }
+
+            val notifType = when (friendship.status) {
+                Status.ACCEPTED -> NotifType.FRIEND_ACCEPT
+                Status.DECLINED -> NotifType.FRIEND_DECLINE
+                else -> null
+            }
+
+            notifType?.let {
+                createNotification(
+                    supabase = supabase,
+                    receiver = friendship.userId,
+                    sender = friendship.friendId,
+                    type = it
+                )
+            }
+
             fetchFriendshipsForUser(userIdToFetch)
             Result.success(true)
         } catch (e: Exception) {

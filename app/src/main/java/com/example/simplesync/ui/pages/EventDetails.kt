@@ -26,6 +26,7 @@ import com.example.simplesync.model.Event
 import com.example.simplesync.model.EventRole
 import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Friendship
+import com.example.simplesync.model.NotifType
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
@@ -556,6 +557,12 @@ fun InviteFriendsSection(
                                 role = EventRole.EDITOR,
                             )
                             invitedUsers.add(friend.id)
+                            notificationViewModel.insertNotif(
+                                type = NotifType.EVENT_INVITE,
+                                receiver = friend.id,
+                                sender = userId,
+                                eventId = event.id,
+                            )
 
                             coroutineScope.launch {
                                 notificationViewModel.sendNotificationToUser(

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplesync.model.Attendee
 import com.example.simplesync.model.EventRole
+import com.example.simplesync.model.NotifType
+import com.example.simplesync.model.Notification
 import com.example.simplesync.model.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
