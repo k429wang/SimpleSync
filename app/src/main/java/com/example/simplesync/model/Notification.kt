@@ -17,5 +17,6 @@ data class Notification(
     @SerialName("event_id") val event: String?,
     @SerialName("is_read") val read: Boolean,
     @Contextual @SerialName("created_at") val timestamp: Instant = Clock.System.now(),
-    @Transient var senderUsername: String? = null
+    @Transient var senderUsername: String? = null,
+    @Transient var senderPfpUrl: String? = null
 )

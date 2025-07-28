@@ -1,7 +1,9 @@
 package com.example.simplesync.ui.pages
 
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,13 +18,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Modifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.model.Notification
 import com.example.simplesync.model.*
+import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.viewmodel.NotificationViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 
@@ -81,8 +87,11 @@ fun NotificationSection(title: String, notifs: List<Notification>) {
         Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         for (notif in notifs) {
+            Log.d("NOTIF", "For $notif: ${notif.timestamp}")
+            Log.d("NOTIF", "For $notif: .substringBefore ${notif.timestamp.toString().substringBefore("T")}")
             NotificationItem(
                 senderName = notif.senderUsername?: "Unknown",
+                senderPfpUrl = notif.senderPfpUrl,
                 message = when (notif.type) {
                     NotifType.EVENT_INVITE -> "invited you to an event"
                     NotifType.EVENT_ACCEPT -> "accepted your event invite"
@@ -100,15 +109,14 @@ fun NotificationSection(title: String, notifs: List<Notification>) {
 }
 
 @Composable
-fun NotificationItem(senderName: String, message: String, date: String) {
+fun NotificationItem(senderName: String, senderPfpUrl: String?, message: String, date: String) {
     Row(modifier = Modifier.padding(vertical = 8.dp)) {
-        Icon(
-            imageVector = Icons.Default.Person,
-            contentDescription = "User avatar",
-            modifier = Modifier
-                .size(48.dp)
-                .padding(end = 12.dp)
+        ReadOnlyProfilePicture(
+                imageUrl = senderPfpUrl,
+                size = 40.dp
         )
+        Spacer(modifier = Modifier.width(12.dp))
+
         Column {
             Text(
                 text = buildAnnotatedString {

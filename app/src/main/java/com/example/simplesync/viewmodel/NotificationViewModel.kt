@@ -124,7 +124,7 @@ class NotificationViewModel @Inject constructor(
                 }.decodeList<Notification>()
                 Log.d("NOTIF_VIEWMODEL", "fetched notifs: $fetched")
 
-                _notifications.value = groupNotifications(populateSenderUsernames(fetched))
+                _notifications.value = groupNotifications(populateSenderInfo(fetched))
             } catch (e: Exception) {
                 Log.e("NotificationViewModel", "Failed to fetch notifications", e)
             }
@@ -154,16 +154,14 @@ class NotificationViewModel @Inject constructor(
         return GroupedNotifications(todayList, yesterdayList, last7DaysList, olderList)
     }
 
-    private suspend fun populateSenderUsernames(notifications: List<Notification>): List<Notification> {
+    private suspend fun populateSenderInfo(notifications: List<Notification>): List<Notification> {
         return notifications.map { notif ->
             try {
                 val senderMeta = supabase.from("users").select {
                     filter { eq("id", notif.sender) }
                 }.decodeSingle<UserMetadata>()
-                //notif.senderUsername = senderMeta.username
-                notif.copy(senderUsername = senderMeta.username)
+                notif.copy(senderUsername = senderMeta.username, senderPfpUrl = senderMeta.profilePicURL)
             } catch (e: Exception) {
-                //notif.senderUsername = "Unknown"
                 notif.copy(senderUsername = "Unknown")
             }
         }
