@@ -37,8 +37,9 @@ import com.example.simplesync.ui.components.EventFormFields
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.FriendshipViewModel
-import com.example.simplesync.viewmodel.NotificationViewModel
 import com.example.simplesync.viewmodel.UserViewModel
+import com.example.simplesync.viewmodel.NotificationViewModel
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.collections.set
 
@@ -52,7 +53,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
     // Events
     val eventViewModel: EventViewModel = hiltViewModel()
 
-    // Notifs
+    // Notifications
     val notificationViewModel: NotificationViewModel = hiltViewModel()
 
     // Baseline copy that will change after each successful save
@@ -300,8 +301,9 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                                 eventViewModel = eventViewModel,
                                 userViewModel = userViewModel,
                                 friendshipViewModel = friendshipViewModel,
+                                friendsCache = friendsCache,
                                 notificationViewModel = notificationViewModel,
-                                friendsCache = friendsCache
+                                currUsername = currUser?.userMetadata?.username
                             )
                         }
                     )
@@ -477,8 +479,9 @@ fun InviteDialogContent(
     eventViewModel: EventViewModel,
     userViewModel: UserViewModel,
     friendshipViewModel: FriendshipViewModel,
+    friendsCache: MutableMap<String, UserMetadata?>,
     notificationViewModel: NotificationViewModel,
-    friendsCache: MutableMap<String, UserMetadata?>
+    currUsername: String?
 ) {
     val attendees by eventViewModel.attendeesForEvent.collectAsState()
     val friendships by friendshipViewModel.friendships.collectAsState()
@@ -491,8 +494,9 @@ fun InviteDialogContent(
         friendsCache = friendsCache,
         userViewModel = userViewModel,
         eventViewModel = eventViewModel,
-        notificationViewModel = notificationViewModel,
         attendees = attendees,
+        notificationViewModel = notificationViewModel,
+        currUsername = currUsername
     )
 
 }
@@ -506,9 +510,11 @@ fun InviteFriendsSection(
     friendsCache: MutableMap<String, UserMetadata?>,
     userViewModel: UserViewModel,
     eventViewModel: EventViewModel,
+    attendees: List<Attendee>,
     notificationViewModel: NotificationViewModel,
-    attendees: List<Attendee>
+    currUsername: String?
 ) {
+    val coroutineScope = rememberCoroutineScope() // for push notif function call
     val invitedUsers = remember { mutableStateListOf<String>() }
     // Skip friends who are already invited (pending) or accepted
     val alreadyInvolvedIds = attendees.map { it.userId }.toSet()
@@ -557,6 +563,13 @@ fun InviteFriendsSection(
                                 sender = userId,
                                 eventId = event.id,
                             )
+
+                            coroutineScope.launch {
+                                notificationViewModel.sendNotificationToUser(
+                                    playerId = friend.playerId,
+                                    message = "@$currUsername invited you to \"${event.name}\""
+                                )
+                            }
                         }
                     )
                 }

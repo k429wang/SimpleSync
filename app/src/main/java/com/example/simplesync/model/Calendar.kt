@@ -1,6 +1,13 @@
 package com.example.simplesync.model
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.remember
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.toKotlinLocalDate
+import java.time.DayOfWeek
+import java.time.LocalDate
+// This java interface is so much more useful than the kotlin equivalent
 import java.time.LocalDateTime
 
 //Abstract Calendar interface. This determines *what* our events are, and what time
@@ -15,7 +22,7 @@ import java.time.LocalDateTime
 data class TimeBlock (
     val startTime : LocalDateTime,
     val endTime: LocalDateTime,
-    val dayOfWeek: Int
+    val dayOfWeek: DayOfWeek
 )
 
 interface AbstractCalendar {
@@ -61,9 +68,80 @@ class DailyTimeSlot(
 ) : CalendarDecorator {
     override fun getAvailability(time: LocalDateTime): MutableList<TimeBlock> {
         val outList = decorating.getAvailability(time)
-        for (i in 0..6){
-            outList.add(TimeBlock(startTime,endTime,i))
+        // for the next week from today, we add a daily time slot
+        val today = LocalDate.now()
+        val days = (0 until 7).map { today.plusDays(it.toLong()) }
+        for ( day in days ){
+            // If it starts at a particular time, we don't want it repeating earlier.
+            if ( day >= startTime.toLocalDate() ) {
+                val nextStart = LocalDateTime.of(day, startTime.toLocalTime())
+                val nextEnd = LocalDateTime.of(day, endTime.toLocalTime())
+                outList.add(TimeBlock(nextStart, nextEnd, day.dayOfWeek))
+            }
         }
+        return outList
+    }
+}
+
+class WeeklyTimeSlot (
+    override val decorating: AbstractCalendar,
+    override val startTime: LocalDateTime,
+    override val endTime: LocalDateTime
+) : CalendarDecorator {
+    override fun getAvailability(time: LocalDateTime): MutableList<TimeBlock> {
+        val outList = decorating.getAvailability(time)
+        // we know which day of the week it is - the weekly time slot occurs
+        // in the next nearest day with the same day of the week.
+        val dayOfWeek = startTime.dayOfWeek
+        // quick and dirty, tbh, but that's fine
+        val today = LocalDate.now()
+        val days = (0 until 7).map { today.plusDays(it.toLong()) }
+        for ( day in days ){
+            // this should only be true ONCE
+            if (day.dayOfWeek == dayOfWeek && day >= startTime.toLocalDate()){
+                val nextStart = LocalDateTime.of(day, startTime.toLocalTime())
+                val nextEnd = LocalDateTime.of(day, endTime.toLocalTime())
+                outList.add(TimeBlock(nextStart, nextEnd, dayOfWeek))
+            }
+        }
+        return outList
+    }
+}
+
+// unused but available
+class WeekdailyTimeSlot (
+    override val decorating: AbstractCalendar,
+    override val startTime: LocalDateTime,
+    override val endTime: LocalDateTime
+) : CalendarDecorator {
+    override fun getAvailability(time: LocalDateTime): MutableList<TimeBlock> {
+        val outList = decorating.getAvailability(time)
+        // we know which day of the week it is - the weekly time slot occurs
+        // in the next nearest day with the same day of the week.
+        val dayOfWeek = startTime.dayOfWeek
+        // quick and dirty, tbh, but that's fine
+        val today = LocalDate.now()
+        val days = (0 until 7).map { today.plusDays(it.toLong()) }
+        for ( day in days ){
+            // this should only be true ONCE
+            if (day.dayOfWeek == dayOfWeek && day >= startTime.toLocalDate() && day.dayOfWeek != DayOfWeek.SATURDAY && day.dayOfWeek != DayOfWeek.SUNDAY){
+                val nextStart = LocalDateTime.of(day, startTime.toLocalTime())
+                val nextEnd = LocalDateTime.of(day, endTime.toLocalTime())
+                outList.add(TimeBlock(nextStart, nextEnd, dayOfWeek))
+            }
+        }
+        return outList
+    }
+}
+
+class OnceTimeSlot (
+    override val decorating: AbstractCalendar,
+    override val startTime: LocalDateTime,
+    override val endTime: LocalDateTime,
+) : CalendarDecorator {
+    override fun getAvailability(time: LocalDateTime): MutableList<TimeBlock> {
+        val outList = decorating.getAvailability(time)
+        outList.add(TimeBlock(startTime,endTime,startTime.dayOfWeek))
         return outList
     }
 }

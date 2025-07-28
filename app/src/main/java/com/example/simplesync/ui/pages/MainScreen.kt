@@ -28,7 +28,7 @@ fun MainScreen(
                 launchSingleTop = true
             }
         } else {
-            navController.navController.navigate(navController.HOME) {
+            navController.navController.navigate(navController.EVENTS) {
                 popUpTo(0)
                 launchSingleTop = true
             }

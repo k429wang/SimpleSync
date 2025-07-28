@@ -20,7 +20,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.simplesync"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -88,6 +88,7 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
     implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("net.sf.biweekly:biweekly:0.6.7")
 
     // hilt
     implementation(libs.hilt.android)
