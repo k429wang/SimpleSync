@@ -1,36 +1,40 @@
-| Date       | Emily   | Erin | Freeman |   Kai   | Keegan  | Sarah | TASK
-| ---------- | ------- | ---- | ------- | ------- | ------  | ----- | -----
-| 2025/05/26 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Setup Github repo (timelog, readme, and sent invites)
-| 2025/05/29 | 3 hours | ---- | ------- | ------- | ------  | ----- | Built Basic Navigation Chassis
-| 2025/06/07 | ------- | ---- | ------- | ------- | 1 hour  | ----- | -----
-| 2025/06/08 | 4 hours | ---- | ------- | ------- | ------  | ----- | Built Basic Scaffold
-| 2025/06/10 | ------- | 2hrs | ------- | ------- | ------  | ----- | Built Navigation Bar
-| 2025/06/15 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Helped Keegan w/ Supabase setup + ER diagrams
-| 2025/06/15 | ------- | ---- | 4 hours | ------- | ------  | ----- | Create external sign in page, and applicable buttons to profile page
-| 2025/06/15 | ------- | 4hrs | ------- | ------  | ------  | ----- | Built Profile Page
-| 2025/06/16 | ------- | ---- | ------- | 3 hours | ------  | ----- | Reviewed/tested User Profile UI PR + integrated w/ backend DB
-| 2025/06/16 | ------- | ---- | 2 hours | ------- | ------  | ----- | Integrate with existing navcontroller/scaffolding
-| 2025/06/22 | ------- | ---- | 4 hours | ------- | ------  | ----- | Set up Google oauth (Google Cloud), sign in button works for gmail accounts
-| 2025/06/22 | 8 hours | ---- | ------- | ------- | ------  | ----- | Began work on Calendar
-| 2025/06/23 | ------- | 6hrs | ------- | ------  | ------  | ----- | Built Create Event Page
-| 2025/06/24 | ------- | ---- | 1 hour  | ------- | ------  | ----- | Open phone file explorer
-| 2025/06/24 | ------- | 1hrs | ------- | ------  | ------  | ----- | Updated New Event Page UI
-| 2025/07/01 | ------- | 5hrs | ------- | ------  | ------  | ----- | Built Friends Page
-| 2025/07/03 | 6 hours | ---- | ------- | ------- | ------  | ----- | Finished Calendar Component
-| 2025/07/06 | ------- | ---- | ------- | 3 hours | ------  | ----- | Integrated Friends UI w/ backend DB
-| 2025/07/07 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Looked into Event Details policy issue
-| 2025/07/08 | 3 hours | ---- | ------- | ------- | ------  | ----- | Incorporated Calendar with backend
-| 2025/07/09 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested My Event + Event Details PRs
-| 2025/07/14 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested profile pictures PR
-| 2025/07/14 | ------- | ---- | ------- | 3 hours | ------  | ----- | Allow users to edit personal account information
-| 2025/07/14 | ------- | ---- | ------- | ------- | 4 hour  | ----- | Implement Adding friends, bunch of reworking
-| 2025/07/16 | ------- | ---- | ------- | ------- | 5 hour  | ----- | Accept/Deny, Friend PFPs, Searchbar, Delete Friends
-| 2025/07/17 | ------- | 2hrs | ------- | ------  | ------  | ----- | Updated Events Details Page UI
-| 2025/07/17 | ------- | ---- | ------- | 1 hour  | ------  | ----- | Reviewed/tested Implement Friends PR
-| 2025/07/18 | ------- | ---- | 6 hours | ------- | ------  | ----- | Set up perpetual login and signout, fix active session (signed in) detection
-| 2025/07/20 | ------- | ---- | ------- | 2 hours | ------  | ----- | Implement descriptive error messages
-| 2025/07/20 | ------- | 2hrs | ------- | ------  | ------  | ----- | Set up Onesignal and Firebase
-| 2025/07/21 | ------- | 7hrs | ------- | ------  | ------  | ----- | Implemented Push Notifications for invite/accept/decline friend invitations
-| 2025/07/20 | 8 hours | ---- | ------- | ------- | ------  | ----- | Updated Calendar component for output + event repetitions
-| 2025/07/21 | ------- | ---- | 6 hours | ------- | ------  | ----- | Implement Google Cal API events
-| 2025/07/27 | ------- | 4hrs | ------- | ------  | ------  | ----- | Implemented Push Notifications for invite/accept/decline event invitations
+| Date       | Emily   | Erin | Freeman | Kai     | Keegan | Sarah | TASK                                                                         |
+| ---------- | ------- | ---- | ------- | ------- | ------ | ----- | ---------------------------------------------------------------------------- |
+| 2025/05/26 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Setup Github repo (timelog, readme, and sent invites)                        |
+| 2025/05/29 | 3 hours | ---- | ------- | ------- | ------ | ----- | Built Basic Navigation Chassis                                               |
+| 2025/06/07 | ------- | ---- | ------- | ------- | 3 hour | ----- | Perform research on database stack                                           |
+| 2025/06/08 | 4 hours | ---- | ------- | ------- | ------ | ----- | Built Basic Scaffold                                                         |
+| 2025/06/10 | ------- | 2hrs | ------- | ------- | ------ | ----- | Built Navigation Bar                                                         |
+| 2025/06/15 | ------- | ---- | ------- | ------- | 3 hour | ----- | Supabase setup + ER diagrams                                                 |
+| 2025/06/15 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Helped Keegan w/ Supabase setup + ER diagrams                                |
+| 2025/06/15 | ------- | ---- | 4 hours | ------- | ------ | ----- | Create external sign in page, and applicable buttons to profile page         |
+| 2025/06/15 | ------- | 4hrs | ------- | ------  | ------ | ----- | Built Profile Page                                                           |
+| 2025/06/16 | ------- | ---- | ------- | 3 hours | ------ | ----- | Reviewed/tested User Profile UI PR + integrated w/ backend DB                |
+| 2025/06/16 | ------- | ---- | 2 hours | ------- | ------ | ----- | Integrate with existing navcontroller/scaffolding                            |
+| 2025/06/22 | ------- | ---- | 4 hours | ------- | ------ | ----- | Set up Google oauth (Google Cloud), sign in button works for gmail accounts  |
+| 2025/06/22 | 8 hours | ---- | ------- | ------- | ------ | ----- | Began work on Calendar                                                       |
+| 2025/06/23 | ------- | 6hrs | ------- | ------  | ------ | ----- | Built Create Event Page                                                      |
+| 2025/06/24 | ------- | ---- | 1 hour  | ------- | ------ | ----- | Open phone file explorer                                                     |
+| 2025/06/24 | ------- | 1hrs | ------- | ------  | ------ | ----- | Updated New Event Page UI                                                    |
+| 2025/06/25 | ------- | ---- | ------- | ------  | 4 hour | ----- | Integrate NewEvent page with backend                                         |
+| 2025/07/01 | ------- | 5hrs | ------- | ------  | ------ | ----- | Built Friends Page                                                           |
+| 2025/07/03 | 6 hours | ---- | ------- | ------- | ------ | ----- | Finished Calendar Component                                                  |
+| 2025/07/06 | ------- | ---- | ------- | 3 hours | ------ | ----- | Integrated Friends UI w/ backend DB                                          |
+| 2025/07/07 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Looked into Event Details policy issue                                       |
+| 2025/07/08 | 3 hours | ---- | ------- | ------- | ------ | ----- | Incorporated Calendar with backend                                           |
+| 2025/07/09 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested My Event + Event Details PRs                                 |
+| 2025/07/13 | ------- | ---- | ------- | ------  | 5 hour | ----- | Create supabase storage, profile pictures component, update My Profile page  |
+| 2025/07/14 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested profile pictures PR                                          |
+| 2025/07/14 | ------- | ---- | ------- | 3 hours | ------ | ----- | Allow users to edit personal account information                             |
+| 2025/07/14 | ------- | ---- | ------- | ------- | 4 hour | ----- | Implement Adding friends, bunch of reworking                                 |
+| 2025/07/16 | ------- | ---- | ------- | ------- | 5 hour | ----- | Accept/Deny Friend Requests, Searchbar, Delete Friends                       |
+| 2025/07/17 | ------- | 2hrs | ------- | ------  | ------ | ----- | Updated Events Details Page UI                                               |
+| 2025/07/17 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested Implement Friends PR                                         |
+| 2025/07/18 | ------- | ---- | 6 hours | ------- | ------ | ----- | Set up perpetual login and signout, fix active session (signed in) detection |
+| 2025/07/20 | ------- | ---- | ------- | 2 hours | ------ | ----- | Implement descriptive error messages                                         |
+| 2025/07/20 | ------- | 2hrs | ------- | ------  | ------ | ----- | Set up Onesignal and Firebase                                                |
+| 2025/07/21 | ------- | 7hrs | ------- | ------  | ------ | ----- | Implemented Push Notifications for invite/accept/decline friend invitations  |
+| 2025/07/20 | 8 hours | ---- | ------- | ------- | ------ | ----- | Updated Calendar component for output + event repetitions                    |
+| 2025/07/21 | ------- | ---- | 6 hours | ------- | ------ | ----- | Implement Google Cal API events                                              |
+| 2025/07/27 | ------- | 4hrs | ------- | ------  | ------ | ----- | Implemented Push Notifications for invite/accept/decline event invitations   |
+| 2025/07/27 | ------- | ---- | ------- | ------- | 6 hour | ----- | Integrate Invite Friends with backend and updating events fetching           |
