@@ -412,7 +412,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 }
             }
 
-
+            /* Just gonna make this not exist for a minute
             // Fill your availability
             Card(
                 modifier = Modifier
@@ -477,7 +477,7 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                 }
 
             }
-
+            */
         }
     }
 }
