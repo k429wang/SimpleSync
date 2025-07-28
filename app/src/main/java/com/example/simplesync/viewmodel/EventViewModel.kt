@@ -218,4 +218,27 @@ class EventViewModel @Inject constructor(
             }
         }
     }
+
+    suspend fun deleteEventCompletely(eventId: String, ownerId: String) {
+        try {
+            // Delete attendees linked to this event
+            supabase.from(ATTENDEES_TABLE).delete {
+                filter { eq("event_id", eventId) }
+            }
+
+            // Delete the event itself
+            supabase.from(EVENTS_TABLE).delete {
+                filter {
+                    eq("id", eventId)
+                }
+            }
+
+            // Refresh list
+            fetchEventsForUser(ownerId)
+            Log.d("EventViewModel", "Event and related attendees deleted for eventId=$eventId")
+        } catch (e: Exception) {
+            Log.e("EventViewModel", "Failed to delete event and attendees for eventId=$eventId", e)
+        }
+    }
+
 }

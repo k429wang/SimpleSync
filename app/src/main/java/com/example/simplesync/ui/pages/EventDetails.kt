@@ -42,10 +42,15 @@ import com.example.simplesync.viewmodel.NotificationViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.collections.set
+import android.util.Log;
+import kotlinx.coroutines.launch
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+
 
 // Citation: built with ChatGPT 4o
 @Composable
 fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
+    Log.d("EventDetailsPage", "Opened EventDetailsPage for event: ${event.id} (${event.name})")
     // Clock
     val clock: Clock = Clock.System
     val now = clock.now()
@@ -255,6 +260,37 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
                 ) {
                     Text("Update Event", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                val coroutineScope = rememberCoroutineScope()
+                val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+                if (userRole == EventRole.OWNER) {
+                    Button(
+                        onClick = {
+                            coroutineScope.launch {
+                                if (userId != null) {
+                                    eventViewModel.deleteEventCompletely(event.id, userId)
+//                                    navController.popBackStack() // Navigates back after deletion
+                                    backDispatcher?.onBackPressed()
+                                }
+                            }
+                        },
+                        enabled = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete Event",
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Delete Event", color = Color.White)
+                    }
                 }
             } else {
                 // Show readonly fields
