@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import com.example.simplesync.model.Notification
@@ -66,10 +67,23 @@ fun NotificationsPage(navController: SimpleSyncNavController? = null) {
             ScreenTitle("Notifications")
             Spacer(modifier = Modifier.height(16.dp))
 
-            NotificationSection("Today", groupedNotifs.today)
-            NotificationSection("Yesterday", groupedNotifs.yesterday)
-            NotificationSection("Last 7 days", groupedNotifs.last7Days)
-            NotificationSection("Older", groupedNotifs.older)
+            val isEmpty = groupedNotifs.today.isEmpty()
+                    && groupedNotifs.yesterday.isEmpty()
+                    && groupedNotifs.last7Days.isEmpty()
+                    && groupedNotifs.older.isEmpty()
+            if (isEmpty) {
+                Text(
+                    text = "No notifications to show.",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            } else {
+                NotificationSection("Today", groupedNotifs.today)
+                NotificationSection("Yesterday", groupedNotifs.yesterday)
+                NotificationSection("Last 7 days", groupedNotifs.last7Days)
+                NotificationSection("Older", groupedNotifs.older)
+            }
         }
     }
 }
