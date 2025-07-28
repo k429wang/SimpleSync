@@ -19,6 +19,7 @@ data class Event(
     @SerialName("location") val location: String?,
     @SerialName("recurrence") val recurrence: Recurrence,
     @SerialName("visibility") val visibility: Visibility,
+    @SerialName("external_id") val externalId: String? = null,
     @Contextual @SerialName("created_at") val createdAt: Instant = Clock.System.now(),
     @Contextual @SerialName("updated_at") val updatedAt: Instant = Clock.System.now()
 )

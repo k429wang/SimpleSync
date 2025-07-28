@@ -1,5 +1,12 @@
 package com.example.simplesync.viewmodel
 
+import com.example.simplesync.model.Event
+import kotlinx.datetime.Instant
+import com.example.simplesync.model.EventType
+import com.example.simplesync.model.Recurrence
+import com.example.simplesync.model.Visibility
+import com.example.simplesync.viewmodel.CalendarEvent
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,8 +23,32 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
 const val EVENTS_TABLE = "events"
 const val ATTENDEES_TABLE = "attendees"
+
+// converts a CalendarEvent (from Google Calendar API) to our app's Event model.
+fun CalendarEvent.toAppEvent(ownerId: String): Event? {
+    val startDateTimeStr = this.start?.dateTime ?: return null
+    val endDateTimeStr = this.end?.dateTime ?: return null
+
+    val startTime = try { Instant.parse(startDateTimeStr) } catch (e: Exception) { return null }
+    val endTime = try { Instant.parse(endDateTimeStr) } catch (e: Exception) { return null }
+
+    return Event(
+        owner = ownerId,
+        name = this.summary ?: "(No title)",
+        description = this.description,
+        startTime = startTime,
+        endTime = endTime,
+        type = EventType.VIRTUAL,
+        location = this.location,
+        recurrence = Recurrence.ONCE,
+        visibility = Visibility.PUBLIC,
+        externalId = this.id
+    )
+}
 
 @HiltViewModel
 class EventViewModel @Inject constructor(
@@ -158,6 +189,11 @@ class EventViewModel @Inject constructor(
                 Log.e("EventViewModel", "Failed to remove attendee", e)
             }
         }
+    }
+
+    fun isDuplicateEvent(externalId: String?): Boolean {
+        if (externalId == null) return false;
+        return _events.value.any{it.externalId == externalId}
     }
 
     // Update an existing event's fields
