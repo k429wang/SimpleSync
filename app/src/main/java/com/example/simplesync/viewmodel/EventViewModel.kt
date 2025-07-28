@@ -10,6 +10,7 @@ import com.example.simplesync.model.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -38,22 +39,32 @@ class EventViewModel @Inject constructor(
     val attendeesForEvent: StateFlow<List<Attendee>> = _attendeesForEvent
 
     // Retrieve the events for a specific user
+    // Not just the events they own, but those they are a part of.
     fun fetchEventsForUser(userId: String) {
         viewModelScope.launch {
             try {
-                val fetched = supabase.from(EVENTS_TABLE).select {
-                    filter {
-                        eq("owner", userId)
+                val events = supabase
+                    .from(EVENTS_TABLE)
+                    .select(
+                        Columns.raw("""
+                        id, owner, name, description, start_time, end_time, type, location, recurrence, visibility, created_at, updated_at,
+                        attendees!inner(event_id, user_id, invited_by, invite_status)
+                    """.trimIndent())
+                    ) {
+                        filter {
+                            eq("attendees.user_id", userId)
+                            eq("attendees.invite_status", "ACCEPTED")
+                        }
                     }
-                }.decodeList<Event>()
-                _events.value = fetched
+                    .decodeList<Event>()
+                _events.value = events
             } catch (e: Exception) {
-                // Handle failure in frontend
                 _events.value = emptyList()
-                Log.e("EventViewModel", "Decoding failed", e)
+                Log.e("EventViewModel", "Error fetching events for user", e)
             }
         }
     }
+
 
     // Retrieve event based on event ID
     fun fetchEventById(eventId: String) {
