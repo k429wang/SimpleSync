@@ -18,7 +18,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.example.simplesync.ui.pages.CalendarPage
 import com.example.simplesync.ui.pages.EventPage
 import com.example.simplesync.ui.pages.ExternalCalendarSyncPage
 import com.example.simplesync.ui.pages.HomePage
@@ -93,9 +92,6 @@ fun SimpleSyncAppNav(
         }
         composable(navController.HOME) {
             HomePage(navController)
-        }
-        composable(navController.CALENDAR) {
-            CalendarPage(navController)
         }
         composable(navController.EVENTS) {
             EventPage(navController)

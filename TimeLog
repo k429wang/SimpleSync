@@ -31,5 +31,6 @@
 | 2025/07/20 | ------- | ---- | ------- | 2 hours | ------  | ----- | Implement descriptive error messages
 | 2025/07/20 | ------- | 2hrs | ------- | ------  | ------  | ----- | Set up Onesignal and Firebase
 | 2025/07/21 | ------- | 7hrs | ------- | ------  | ------  | ----- | Implemented Push Notifications for invite/accept/decline friend invitations
+| 2025/07/20 | 8 hours | ---- | ------- | ------- | ------  | ----- | Updated Calendar component for output + event repetitions
 | 2025/07/21 | ------- | ---- | 6 hours | ------- | ------  | ----- | Implement Google Cal API events
 | 2025/07/27 | ------- | 4hrs | ------- | ------  | ------  | ----- | Implemented Push Notifications for invite/accept/decline event invitations
