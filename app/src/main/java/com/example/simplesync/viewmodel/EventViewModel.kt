@@ -5,13 +5,11 @@ import kotlinx.datetime.Instant
 import com.example.simplesync.model.EventType
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.Visibility
-import com.example.simplesync.viewmodel.CalendarEvent
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplesync.model.Attendee
-import com.example.simplesync.model.Event
 import com.example.simplesync.model.EventRole
 import com.example.simplesync.model.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -192,7 +190,7 @@ class EventViewModel @Inject constructor(
     }
 
     fun isDuplicateEvent(externalId: String?): Boolean {
-        if (externalId == null) return false;
+        if (externalId == null) return false
         return _events.value.any{it.externalId == externalId}
     }
 
