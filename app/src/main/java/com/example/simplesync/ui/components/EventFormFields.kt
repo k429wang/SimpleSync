@@ -25,7 +25,6 @@ fun EventFormFields(
 ) {
     val typeOptions = listOf("IRL", "Virtual")
     val recurrenceOptions = listOf("Once", "Daily", "Weekly")
-    val visibilityOptions = listOf("Solo", "Private", "Public")
 
     EventField("Name:", name, onNameChange)
     EventField("Description:", description, onDescriptionChange)
@@ -36,5 +35,5 @@ fun EventFormFields(
     DropdownField("Type:", typeOptions, type, onTypeChange)
     EventField("Location:", location, onLocationChange)
     DropdownField("Recurrence:", recurrenceOptions, recurrence, onRecurrenceChange)
-    DropdownField("Visibility:", visibilityOptions, visibility, onVisibilityChange)
+    VisibilityDropdownField(visibility, onVisibilityChange)
 }
