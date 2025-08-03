@@ -56,6 +56,16 @@ fun UserDetails(
     val currUser by viewModel.currUser.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
+    if (currUser == null) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     currUser?.let { user ->
         val authUser = user.authUser
         val metadata = user.userMetadata
@@ -64,9 +74,9 @@ fun UserDetails(
         var lastName by remember { mutableStateOf(metadata.lastName) }
         var username by remember { mutableStateOf(metadata.username) }
 
-        EventField("Username:", username, onValueChange = {username = it})
-        EventField("First Name:", firstName, onValueChange = {firstName = it})
-        EventField("Last Name:", lastName, onValueChange = {lastName = it})
+        EventField("Username:", username) { username = it }
+        EventField("First Name:", firstName) {firstName = it}
+        EventField("Last Name:", lastName) {lastName = it}
 
         Spacer(modifier = Modifier.height(16.dp))
 

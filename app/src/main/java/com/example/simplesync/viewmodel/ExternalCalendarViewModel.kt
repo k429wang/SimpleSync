@@ -23,7 +23,7 @@ data class CalendarEventsResponse(
 data class CalendarEvent(
     val id: String?,
     val summary: String?,
-    val description: String?,   // <-- add this line
+    val description: String?,
     val location: String?,
     val start: CalendarDateTime?,
     val end: CalendarDateTime?
@@ -104,5 +104,4 @@ class ExternalCalendarViewModel : ViewModel() {
             }
         }
     }
-
 }

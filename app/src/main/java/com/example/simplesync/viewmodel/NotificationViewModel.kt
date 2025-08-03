@@ -25,8 +25,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 
-val apiKey = BuildConfig.ONESIGNAL_API_KEY
-val appId = BuildConfig.ONESIGNAL_APP_ID
+const val apiKey = BuildConfig.ONESIGNAL_API_KEY
+const val appId = BuildConfig.ONESIGNAL_APP_ID
 const val USERS_TABLE = "users"
 const val NOTIFS_TABLE = "notifications"
 
@@ -55,7 +55,7 @@ class NotificationViewModel @Inject constructor(
             if (playerId != null) {
                 sendPushNotification(playerId, message)
             } else {
-                println("Player ID not found for user $playerId")
+                println("Player ID not found for this user")
                 false
             }
         } catch (e: Exception) {
@@ -193,5 +193,4 @@ class NotificationViewModel @Inject constructor(
             }
         }
     }
-
 }

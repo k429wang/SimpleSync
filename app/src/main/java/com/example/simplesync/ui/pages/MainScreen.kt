@@ -1,7 +1,5 @@
 package com.example.simplesync.ui.pages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -10,7 +8,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.simplesync.ui.navigation.SimpleSyncAppNav
 import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import com.example.simplesync.viewmodel.SignInViewModel
-
 
 @Composable
 fun MainScreen(

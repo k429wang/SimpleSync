@@ -11,8 +11,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.simplesync.model.Attendee
 import com.example.simplesync.model.EventRole
-import com.example.simplesync.model.NotifType
-import com.example.simplesync.model.Notification
 import com.example.simplesync.model.Status
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
@@ -22,8 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
 
 const val EVENTS_TABLE = "events"
 const val ATTENDEES_TABLE = "attendees"
@@ -95,7 +91,6 @@ class EventViewModel @Inject constructor(
             }
         }
     }
-
 
     // Retrieve event based on event ID
     fun fetchEventById(eventId: String) {
@@ -240,5 +235,4 @@ class EventViewModel @Inject constructor(
             Log.e("EventViewModel", "Failed to delete event and attendees for eventId=$eventId", e)
         }
     }
-
 }

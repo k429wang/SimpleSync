@@ -1,7 +1,5 @@
 package com.example.simplesync.ui.pages
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,8 +26,6 @@ import androidx.compose.runtime.livedata.observeAsState
 
 import android.util.Log
 import com.example.simplesync.viewmodel.EventViewModel
-
-
 
 @Composable
 fun ProfileScreen(

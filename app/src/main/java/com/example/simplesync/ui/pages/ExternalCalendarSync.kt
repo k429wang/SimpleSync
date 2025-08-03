@@ -1,9 +1,9 @@
 package com.example.simplesync.ui.pages
+
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.common.api.ApiException
-import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -30,7 +30,6 @@ import com.example.simplesync.ui.navigation.SimpleSyncNavController
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
 
 import biweekly.Biweekly
@@ -234,7 +233,4 @@ fun ExternalCalendarSyncPage(navController: SimpleSyncNavController) {
 
 @Preview(showBackground = true)
 @Composable
-fun ExternalCalendarSyncPreview() {
-    // Preview cannot provide a real navController, so pass a stub or mock if needed
-    // ExternalCalendarSyncPage(navController = ...)
-}
+fun ExternalCalendarSyncPreview() { }

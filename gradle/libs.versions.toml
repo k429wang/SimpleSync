@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.3"
+agp = "8.10.1"
 bom = "3.1.4"
 coilCompose = "3.2.0"
 coilNetworkOkhttp = "3.2.0"
@@ -17,6 +17,8 @@ composeBom = "2025.06.00"
 materialIconsExtended = "1.7.8"
 navigationRuntimeAndroid = "2.9.0"
 navigationComposeAndroid = "2.9.0"
+runtimeLivedata = "1.8.3"
+protoliteWellKnownTypes = "18.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +48,8 @@ androidx-navigation-compose-android = { group = "androidx.navigation", name = "n
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
 storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt" }
 supabase-postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+protolite-well-known-types = { group = "com.google.firebase", name = "protolite-well-known-types", version.ref = "protoliteWellKnownTypes" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

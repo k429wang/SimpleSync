@@ -1,13 +1,7 @@
 package com.example.simplesync.model
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.remember
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.toKotlinLocalDate
 import java.time.DayOfWeek
 import java.time.LocalDate
-// This java interface is so much more useful than the kotlin equivalent
 import java.time.LocalDateTime
 
 //Abstract Calendar interface. This determines *what* our events are, and what time
@@ -31,7 +25,7 @@ interface AbstractCalendar {
 
 // Concrete Calendar - implements the accessor,
 // default of a blank calendar is every time slot is free.
-class ConcreteCalendar() : AbstractCalendar {
+class ConcreteCalendar : AbstractCalendar {
     override fun getAvailability(time: LocalDateTime): MutableList<TimeBlock> {
         return mutableListOf()
     }
