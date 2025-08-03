@@ -56,16 +56,6 @@ fun UserDetails(
     val currUser by viewModel.currUser.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    if (currUser == null) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-        return
-    }
-
     currUser?.let { user ->
         val authUser = user.authUser
         val metadata = user.userMetadata
