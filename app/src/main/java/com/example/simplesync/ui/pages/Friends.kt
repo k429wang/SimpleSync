@@ -106,7 +106,6 @@ fun FriendsPage(
                 }
             }
 
-
             // "Add Friend" dialog popup
             if (showAddFriendDialog) {
                 AlertDialog(
@@ -466,7 +465,6 @@ fun FriendListItem(
             )
         }
 
-
         if (isIncoming && onAccept != null && onDecline != null) {
             // Buttons to Accept/Decline incoming requests (For Pending tab)
             AcceptAndDeclineButtons(onAccept, onDecline)
@@ -476,5 +474,3 @@ fun FriendListItem(
         }
     }
 }
-
-

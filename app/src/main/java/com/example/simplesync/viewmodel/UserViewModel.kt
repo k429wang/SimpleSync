@@ -44,8 +44,7 @@ class UserViewModel @Inject constructor(
                     filter {
                         eq("id", userId)
                     }
-                }
-                    .decodeSingle<UserMetadata>()
+                }.decodeSingle<UserMetadata>()
 
                 _currUser.value = FullUser(authUser, metadata)
             } catch (e: Exception) {
@@ -140,8 +139,7 @@ class UserViewModel @Inject constructor(
             }
         }
     }
-
-
+    
     suspend fun uploadProfilePicture(imageBytes: ByteArray): Boolean {
         val userId = _currUser.value?.authUser?.id ?: return false // Exit early if no user
         val filePath = "$userId/profile_pic.jpg" // profile-pictures/<user-id>/profile_pic.jpg

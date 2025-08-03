@@ -1,14 +1,11 @@
 package com.example.simplesync.ui.pages
 
 import DropdownField
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
@@ -32,7 +29,6 @@ import com.example.simplesync.model.Status
 import com.example.simplesync.model.UserMetadata
 import com.example.simplesync.model.Visibility
 import com.example.simplesync.model.displayName
-import com.example.simplesync.ui.components.EventField
 import com.example.simplesync.ui.components.EventFormFields
 import com.example.simplesync.ui.components.ReadOnlyProfilePicture
 import com.example.simplesync.viewmodel.EventViewModel
@@ -43,9 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlin.collections.set
 import android.util.Log;
-import kotlinx.coroutines.launch
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-
 
 // Citation: built with ChatGPT 4o
 @Composable
@@ -113,8 +107,6 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
             friendshipViewModel.fetchFriendshipsForUser(userId)
         }
     }
-
-
 
     LaunchedEffect(eventResult) {
         eventResult?.let { result ->
@@ -272,7 +264,6 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                             coroutineScope.launch {
                                 if (userId != null) {
                                     eventViewModel.deleteEventCompletely(event.id, userId)
-//                                    navController.popBackStack() // Navigates back after deletion
                                     backDispatcher?.onBackPressed()
                                 }
                             }
@@ -411,73 +402,6 @@ fun EventDetailsPage(navController: SimpleSyncNavController, event: Event) {
                     }
                 }
             }
-
-            /* Just gonna make this not exist for a minute
-            // Fill your availability
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE8E8E8))
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        "Fill your availability",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Your days + calendar grid placeholder
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
-                            .background(Color.White)
-                    ) {
-                        // Placeholder content
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-
-                    Button(
-                        onClick = { /* TODO: Update calendar slots */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    ) {
-                        Text("Add new", color = Color.White)
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-            // TODO: backend connection - user can add optional note when responding to event invite
-//            OutlinedTextField(
-//                value = noteText,
-//                onValueChange = { noteText = it },
-//                label = { Text("Note") },
-//                modifier = Modifier.fillMaxWidth()
-//            )
-            EventField("Note:", noteText, {noteText = it}) // TODO: formatting is weird
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Button(
-                        onClick = { /* TODO */ },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp),
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send", tint = Color.White)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("SEND", color = Color.White)
-                    }
-                }
-
-            }
-            */
         }
     }
 }
@@ -536,7 +460,6 @@ fun InviteDialogContent(
     )
 
 }
-
 
 @Composable
 fun InviteFriendsSection(
@@ -758,7 +681,6 @@ fun AttendeeListItem(
         }
     }
 }
-
 
 // Citation: from Chat GPT 4o
 fun formatEventTime(event: Event): String {

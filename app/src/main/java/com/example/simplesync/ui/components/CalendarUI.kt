@@ -2,8 +2,6 @@ package com.example.simplesync.ui.components
 
 import com.example.simplesync.ui.navigation.SimpleSyncNavController
 import android.util.Log
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.simplesync.model.AbstractCalendar
 import com.example.simplesync.model.ConcreteCalendar
 import androidx.compose.foundation.background
@@ -21,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,7 +27,6 @@ import com.example.simplesync.model.DailyTimeSlot
 import com.example.simplesync.model.WeeklyTimeSlot
 import com.example.simplesync.model.Recurrence
 import com.example.simplesync.model.TimeBlock
-import com.example.simplesync.ui.navigation.rememberSimpleSyncNavController
 import com.example.simplesync.viewmodel.EventViewModel
 import com.example.simplesync.viewmodel.UserViewModel
 import kotlinx.datetime.toLocalDateTime
@@ -58,7 +54,7 @@ fun AvailabilityGrid(
     val currUser by userViewModel.currUser.collectAsState()
     val events by eventViewModel.events.collectAsState()
 
-    var baseCalendar = remember {calendar}
+    val baseCalendar = remember {calendar}
     // I don't think we actually want this to be a remember at this part.
     var returnTime by remember { mutableStateOf<LocalDateTime?>( null ) }
 
@@ -104,20 +100,13 @@ fun AvailabilityGrid(
         currUser?.let {
             eventViewModel.fetchEventsForUser(it.authUser.id)
             // TODO: Currently only fetches owned events.
-            //  Do we want to show invited/accepted events too?
-            // yes, but give me a second
         }
     }
 
     val today = remember { LocalDate.now() }
-    // convoluted AI-made code, but it works
     val days = remember { (0 until 7).map { today.plusDays(it.toLong()) } }
-    // This has been fixed up from garbage AI nonsense.
     val timeSlots : MutableList<LocalTime> = remember { mutableListOf() }
-    // the passed value is vestigial - remove at some point
-    //val availabilityData : MutableState<MutableList<TimeBlock>> = remember {mutableStateOf(decoratedCalendar.getAvailability(today.atTime(0,0)))}
 
-    //
     Column(modifier = modifier.fillMaxWidth().wrapContentHeight()) {
         // Day headers - makes sense to keep these, but pared down. No need for day-by-day,
         // we can just do Mon-Sun, no need for dates. Too much info.
