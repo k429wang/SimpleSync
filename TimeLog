@@ -54,5 +54,7 @@
 | 2025/07/27 | 3 hours | ---- | ------- | ------- | ------ | ----- | Fixed minor bugs in navigation and event creation                            |
 | 2025/07/27 | ------- | ---- | ------- | ------- | ------ | 2 hrs | Fix UI load delay in Notifications page UI and resolve conflicts             |
 | 2025/07/27 | ------- | ---- | 6 hours | ------- | ------ | ----- | Upload .ics files, parse through ics events and upload to database           |
+| 2025/07/27 | ------- | ---- | ------- | 1 hour  | ------ | ----- | Reviewed/tested various last minute PRs                                      |
 | 2025/07/28 | ------- | ---- | 5 hours | ------- | ------ | ----- | Delete Event functionality, added DELETE policy in database                  |
 | 2025/07/28 | ------- | ---- | ------- | ------- | ------ | 3 hrs | Implement logic to add entry to notifications DB upon friend/event activity  |
+| 2025/08/03 | ------- | ---- | ------- | 2 hours | ------ | ----- | Clean up codebase and github repo                                            |
